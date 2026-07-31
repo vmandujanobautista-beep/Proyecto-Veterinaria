@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', function () {
-    return redirect()->route('dashboard');
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return view('welcome');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

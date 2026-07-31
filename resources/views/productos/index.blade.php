@@ -7,7 +7,7 @@
             </div>
             <a href="{{ route('productos.create') }}"
                id="btn-nuevo-producto"
-               class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
+               class="ml-4 mt-2 inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -48,7 +48,7 @@
 
             <select id="filtro-categoria"
                     name="categoria"
-                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 text-slate-700 transition-all">
+                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50 text-slate-700 w-full sm:w-56 transition-all">
                 <option value="">Todas las categorías</option>
                 <option value="Medicamento"  {{ request('categoria') === 'Medicamento'  ? 'selected' : '' }}>💊 Medicamento</option>
                 <option value="Alimento"     {{ request('categoria') === 'Alimento'     ? 'selected' : '' }}>🥗 Alimento</option>
@@ -60,12 +60,12 @@
             </select>
 
             <button type="submit"
-                    class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition-colors">
+                    class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl w-32 transition-colors">
                 Buscar
             </button>
             @if(request('buscar') || request('categoria'))
                 <a href="{{ route('productos.index') }}"
-                   class="px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors text-center">
+                   class="px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors w-32  text-center">
                     Limpiar
                 </a>
             @endif

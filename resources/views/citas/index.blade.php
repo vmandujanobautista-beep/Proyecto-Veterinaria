@@ -7,7 +7,7 @@
             </div>
             <a href="{{ route('citas.create') }}"
                id="btn-nueva-cita"
-               class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
+               class="ml-4 mt-2 inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -31,17 +31,17 @@
                        class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-slate-50 transition-all">
             </div>
 
-            <!-- Filtro estado -->
+            <!-- Filtro estado 
             <select id="filtro-estado"
                     name="estado"
-                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-slate-50 text-slate-700 transition-all">
+                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-slate-50 text-slate-700 w-full sm:w-56 transition-all">
                 <option value="">Todos los estados</option>
                 <option value="pendiente"  {{ request('estado') === 'pendiente'  ? 'selected' : '' }}>⏳ Pendiente</option>
                 <option value="confirmada" {{ request('estado') === 'confirmada' ? 'selected' : '' }}>✅ Confirmada</option>
                 <option value="completada" {{ request('estado') === 'completada' ? 'selected' : '' }}>🏁 Completada</option>
                 <option value="cancelada"  {{ request('estado') === 'cancelada'  ? 'selected' : '' }}>❌ Cancelada</option>
             </select>
-
+-->
             <!-- Filtro fecha -->
             <input type="date"
                    id="filtro-fecha"
@@ -50,12 +50,13 @@
                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-slate-50 text-slate-700 transition-all">
 
             <button type="submit"
-                    class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition-colors">
+                    class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl w-32 transition-colors">
                 Filtrar
             </button>
-            @if(request('buscar') || request('estado') || request('fecha'))
+            <!--request('estado') ||-->
+            @if( request('buscar') || request('fecha'))
                 <a href="{{ route('citas.index') }}"
-                   class="px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors text-center">
+                   class="px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 w-32 transition-colors text-center">
                     Limpiar
                 </a>
             @endif

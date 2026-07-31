@@ -7,7 +7,7 @@
             </div>
             <a href="{{ route('ventas.create') }}"
                id="btn-nueva-venta"
-               class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
+               class="ml-4 mt-2 inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -52,7 +52,7 @@
 
             <select id="filtro-metodo"
                     name="metodo_pago"
-                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 bg-slate-50 text-slate-700 transition-all">
+                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 bg-slate-50 text-slate-700 w-full sm:w-56 transition-all">
                 <option value="">Método de pago</option>
                 <option value="Efectivo"       {{ request('metodo_pago') === 'Efectivo'       ? 'selected' : '' }}>💵 Efectivo</option>
                 <option value="Tarjeta"        {{ request('metodo_pago') === 'Tarjeta'        ? 'selected' : '' }}>💳 Tarjeta</option>
@@ -66,12 +66,12 @@
                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 bg-slate-50 text-slate-700 transition-all">
 
             <button type="submit"
-                    class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition-colors">
+                    class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl w-32 transition-colors">
                 Filtrar
             </button>
             @if(request()->hasAny(['buscar','metodo_pago','fecha']))
                 <a href="{{ route('ventas.index') }}"
-                   class="px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors text-center">
+                   class="px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors w-32 text-center">
                     Limpiar
                 </a>
             @endif

@@ -29,7 +29,14 @@
            class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-slate-100 transition-all duration-300 cursor-pointer">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center text-2xl">
-                    🐶
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <!-- Cojinetes de los dedos -->
+                    <path d="M12 4.5c-1.5 0-2 1.5-2 2.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5c0-1-.5-2.5-2-2.5z"/>
+                    <path d="M18.5 7.5c-1.5 0-2 1.5-2 2.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5c0-1-.5-2.5-2-2.5z"/>
+                    <path d="M5.5 7.5c-1.5 0-2 1.5-2 2.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5c0-1-.5-2.5-2-2.5z"/>
+                    <!-- Cojinete principal (palma) -->
+                    <path d="M12 11.5c-2.5 0-4.5 1.5-5.5 3.5-.5 1-1 2-1 3.5 0 2.5 2.5 4.5 6.5 4.5s6.5-2 6.5-4.5c0-1.5-.5-2.5-1-3.5-1-2-3-3.5-5.5-3.5z"/>
+                    </svg>
                 </div>
                 <span class="text-xs text-sky-600 bg-sky-50 px-2 py-1 rounded-full font-medium">+12 este mes</span>
             </div>
@@ -135,7 +142,10 @@
                 <a href="{{ route('mascotas.create') }}"
                    class="flex items-center gap-3 p-3 rounded-xl bg-sky-50 hover:bg-sky-100 transition-colors group">
                     <div class="w-9 h-9 rounded-lg bg-sky-500 flex items-center justify-center flex-shrink-0 text-lg">
-                        🐾
+                       <!-- 🐾-->
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-sky-800">Nueva Mascota</p>

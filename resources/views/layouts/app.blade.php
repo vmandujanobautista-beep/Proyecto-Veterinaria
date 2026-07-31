@@ -69,18 +69,57 @@
 <div class="flex h-screen overflow-hidden">
 
     <!-- ===== SIDEBAR ===== -->
-    <aside id="sidebar" class="vet-sidebar w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-40">
-
-        <!-- Logo / Brand -->
-        <div class="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-            <div class="flex items-center justify-center w-10 h-10 bg-sky-400/20 rounded-xl paw-pulse">
-                <span class="text-2xl">🐾</span>
-            </div>
-            <div>
-                <h1 class="text-white font-bold text-lg leading-none">VetCare</h1>
-                <p class="text-sky-300 text-xs mt-0.5">Gestión Veterinaria</p>
-            </div>
+    <aside id="sidebar" class="vet-sidebar w-72 flex-shrink-0 flex flex-col transition-all duration-300 z-40">
+<!-- Logo / Brand -->
+<!-- Agregamos justify-between aquí para separar los extremos -->
+<div class="flex items-center justify-between px-6 py-5 border-b border-white/10 w-full">
+    
+    <!-- Lado Izquierdo: Agrupamos el Icono de Usuario y el Texto -->
+    <div class="flex items-center gap-3">
+        
+        <!-- Contenedor del Icono de Usuario -->
+        <div class="w-12 h-12 bg-[#0c3859] rounded-full flex items-center justify-center shrink-0">
+            <!-- El SVG del usuario (solo uno) -->
+            <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
         </div>
+        
+        <!-- Textos -->
+        <div class="whitespace-nowrap">
+            <h1 class="text-white text-xl font-bold leading-tight">VetCare</h1>
+            <p class="text-sky-300 text-sm leading-tight">Gestión Veterinaria</p>
+        </div>
+
+    </div>
+    
+    <!-- Lado Derecho: Nuevo botón de perfil en forma de tuerca -->      
+    <!-- Al estar dentro de un contenedor justify-between, esto se empuja solo a la derecha -->
+    <!-- Puedes quitar el -mr-6, o dejarlo como -mr-2 si quieres que pegue aún más al borde -->
+    <a href="/profile" 
+       class="p-2 text-sky-400 rounded-lg hover:bg-[#1a5582] hover:text-white transition-colors duration-200 -mr-2"
+       title="Configuración de Perfil">
+        <!-- Icono de Tuerca (Engranaje) SVG -->
+        <svg class="w-6 h-6" 
+             fill="none" 
+             stroke="currentColor" 
+             viewBox="0 0 24 24" 
+             xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" 
+                  stroke-linejoin="round" 
+                  stroke-width="2" 
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+            </path>
+            <path stroke-linecap="round" 
+                  stroke-linejoin="round" 
+                  stroke-width="2" 
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+            </path>
+        </svg>
+    </a>
+</div>
+
 
         <!-- Navigation -->
         <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto">

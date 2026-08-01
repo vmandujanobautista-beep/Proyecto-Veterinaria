@@ -15,6 +15,20 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
+        /* Oculta elementos con x-cloak hasta que Alpine.js los inicialice */
+        [x-cloak] { display: none !important; }
+
+        /* Corrección 1: Garantizar selección, copiar, pegar y cortar en todos los campos y modals */
+        * {
+            user-select: auto;
+            -webkit-user-select: auto;
+        }
+        input, textarea, [contenteditable] {
+            user-select: text !important;
+            -webkit-user-select: text !important;
+            pointer-events: auto !important;
+        }
+
         *, *::before, *::after { box-sizing: border-box; }
 
         body {
@@ -66,6 +80,31 @@
             pointer-events: none;
         }
 
+        /* ── Animated Veterinary Background Pattern ── */
+        @keyframes vetPatternMove {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(-220px, -220px);
+            }
+        }
+        .vet-pattern-layer {
+            position: absolute;
+            top: -220px;
+            left: -220px;
+            right: -220px;
+            bottom: -220px;
+            width: calc(100% + 440px);
+            height: calc(100% + 440px);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg opacity='0.22'%3E%3C!-- 1. CURITA --%3E%3Cg transform='translate(5, 5) scale(0.55) rotate(15)'%3E%3Crect x='15' y='35' width='70' height='30' rx='15' fill='%230284c7' opacity='0.35'/%3E%3Crect x='35' y='32' width='30' height='36' rx='4' fill='none' stroke='%230ea5e9' stroke-width='2'/%3E%3Cpath d='M47,42 h6 v16 h-6 z M42,47 h16 v6 h-16 z' fill='%230ea5e9'/%3E%3Ccircle cx='25' cy='45' r='2.5' fill='%230ea5e9'/%3E%3Ccircle cx='25' cy='55' r='2.5' fill='%230ea5e9'/%3E%3Ccircle cx='75' cy='45' r='2.5' fill='%230ea5e9'/%3E%3Ccircle cx='75' cy='55' r='2.5' fill='%230ea5e9'/%3E%3C/g%3E%3C!-- 2. MALETIN --%3E%3Cg transform='translate(125, 10) scale(0.5) rotate(-10)'%3E%3Cpath d='M35,25 v-8 a15,15 0 0,1 30,0 v8' fill='none' stroke='%230284c7' stroke-width='6' stroke-linecap='round'/%3E%3Crect x='15' y='25' width='70' height='60' rx='8' fill='%230284c7' opacity='0.35'/%3E%3Cpath d='M45,42 h10 v8 h8 v10 h-8 v8 h-10 v-8 h-8 v-10 h8 z' fill='%230ea5e9'/%3E%3C/g%3E%3C!-- 3. ESTETOSCOPIO --%3E%3Cg transform='translate(75, 60) scale(0.52) rotate(10)' stroke='%23059669' fill='none' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='25' cy='15' r='4' fill='%23059669'/%3E%3Ccircle cx='75' cy='15' r='4' fill='%23059669'/%3E%3Cpath d='M25,20 v25 a25,25 0 0,0 50,0 v-25'/%3E%3Cpath d='M50,45 v30'/%3E%3Ccircle cx='50' cy='82' r='10' stroke-width='5' fill='none'/%3E%3Cpath d='M48,79 h4 v6 h-4 z M45,80 h10 v4 h-10 z' fill='%23059669' stroke='none'/%3E%3C/g%3E%3C!-- 4. JERINGA --%3E%3Cg transform='translate(10, 115) scale(0.52) rotate(15)'%3E%3Cg transform='rotate(45 50 50)'%3E%3Crect x='35' y='5' width='30' height='5' rx='2' fill='%230ea5e9'/%3E%3Crect x='47' y='10' width='6' height='20' fill='%230ea5e9'/%3E%3Crect x='35' y='30' width='30' height='45' rx='4' fill='none' stroke='%230ea5e9' stroke-width='5'/%3E%3Crect x='38' y='45' width='24' height='28' fill='%230ea5e9' opacity='0.4'/%3E%3Cpath d='M35,38 h10 M35,45 h6 M35,52 h10 M35,59 h6' stroke='%230284c7' stroke-width='2' fill='none'/%3E%3Crect x='45' y='75' width='10' height='5' fill='%230ea5e9'/%3E%3Crect x='49' y='80' width='2' height='15' fill='%230ea5e9'/%3E%3C/g%3E%3C/g%3E%3C!-- 5. HUELLA CON CORAZON --%3E%3Cg transform='translate(135, 115) scale(0.5) rotate(-15)'%3E%3Cg fill='%230284c7' opacity='0.45'%3E%3Cellipse cx='28' cy='30' rx='12' ry='16' transform='rotate(-20 28 30)'/%3E%3Cellipse cx='50' cy='18' rx='14' ry='18'/%3E%3Cellipse cx='72' cy='30' rx='12' ry='16' transform='rotate(20 72 30)'/%3E%3Cpath d='M22,55 Q10,75 30,90 Q50,105 70,90 Q90,75 78,55 Q65,40 50,48 Q35,40 22,55 Z'/%3E%3C/g%3E%3Cpath d='M50,80 Q40,68 40,62 Q40,56 45,56 Q48,56 50,59 Q52,56 55,56 Q60,56 60,62 Q60,68 50,80 Z' fill='%230ea5e9'/%3E%3C/g%3E%3C!-- 6. HUESO --%3E%3Cg transform='translate(70, 155) scale(0.5) rotate(-10)'%3E%3Cg fill='%23059669' opacity='0.4' transform='rotate(20 50 50)'%3E%3Crect x='25' y='40' width='50' height='20' /%3E%3Ccircle cx='25' cy='35' r='14' /%3E%3Ccircle cx='25' cy='65' r='14' /%3E%3Ccircle cx='75' cy='35' r='14' /%3E%3Ccircle cx='75' cy='65' r='14' /%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 220px 220px;
+            animation: vetPatternMove 38s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
         /* ── Feature cards (light style) ── */
         .feature-card {
             background: rgba(255, 255, 255, 0.75);
@@ -115,18 +154,109 @@
             transform: translateY(-2px);
         }
         .btn-primary:active { transform: translateY(0); }
+        /* ── Animated PawPrint Icon (Iniciar Sesión) ── */
+        @keyframes pawStamp {
+            0% {
+                opacity: 0;
+                transform: scale(1.5) translateY(-12px);
+            }
+            30% {
+                opacity: 1;
+                transform: scale(0.8) translateY(0);
+            }
+            60% {
+                transform: scale(1.15) translateY(-2px);
+            }
+            85% {
+                transform: scale(0.95) translateY(0);
+            }
+            100% {
+                opacity: 0.9;
+                transform: scale(1.05) translateY(0);
+            }
+        }
+        .btn-primary .paw-inner {
+            transform-origin: center;
+            transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+        }
+        .btn-primary:hover .paw-inner {
+            animation: pawStamp 0.55s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+        }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.70);
-            border: 1.5px solid rgba(14, 165, 233, 0.35);
-            color: #0369a1;
+            background: transparent;
+            border: 1px solid transparent;
+            color: #64748b;
             transition: all 0.25s ease;
         }
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: rgba(14, 165, 233, 0.65);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(14, 165, 233, 0.15);
+            background: rgba(240, 249, 255, 0.80);
+            border-color: rgba(186, 230, 253, 0.60);
+            color: #0284c7;
+            transform: translateY(-1px);
+        }
+
+        /* ── Animated UserPlus Icon (Registrar Usuario) ── */
+        .btn-secondary .user-avatar {
+            transform-origin: 50% 50%;
+            transition: transform 0.25s ease-out;
+        }
+        .btn-secondary .plus-sign {
+            transform-origin: 19px 19px;
+            transition: transform 0.3s ease-out;
+        }
+        .btn-secondary:hover .user-avatar {
+            transform: scale(1.08) translateY(-1.5px);
+        }
+        .btn-secondary:hover .plus-sign {
+            transform: scale(1.15) rotate(90deg);
+        }
+
+        /* ── Animated QuestionMark Icon (Ayuda) ── */
+        @keyframes drawQuestionMark {
+            0% { stroke-dashoffset: 20; }
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes dotBounce {
+            0% { transform: translateY(0); stroke-dashoffset: 4; }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0); stroke-dashoffset: 0; }
+        }
+        @keyframes groupPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        .btn-help {
+            color: rgba(255,255,255,0.90);
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            transition: all 0.25s ease;
+        }
+        .btn-help:hover {
+            background: rgba(255,255,255,0.22);
+            color: #ffffff;
+        }
+        .btn-help .question-group {
+            transform-origin: center;
+            transition: transform 0.25s ease;
+        }
+        .btn-help .question-mark {
+            stroke-dasharray: 20;
+            stroke-dashoffset: 0;
+        }
+        .btn-help .question-mark-dot {
+            stroke-dasharray: 4;
+            stroke-dashoffset: 0;
+            transform-origin: center;
+        }
+        .btn-help:hover .question-group {
+            animation: groupPulse 0.25s ease-out;
+        }
+        .btn-help:hover .question-mark {
+            animation: drawQuestionMark 0.4s ease-in-out;
+        }
+        .btn-help:hover .question-mark-dot {
+            animation: dotBounce 0.3s ease-out;
         }
 
         /* ── Badge ── */
@@ -149,12 +279,19 @@
 </head>
 <body>
 
-<div class="landing-bg relative">
+<div class="landing-bg relative"
+     x-data="{ activeModal: @js(session('open_modal') ?? session('success_modal') ?? ($errors->any() ? 'login' : null)) }"
+     x-init="if ('{{ session('success_modal') }}' === 'reset_success') {
+         setTimeout(() => { activeModal = 'login'; }, 2000);
+     }">
 
     <!-- Soft blobs -->
     <div class="blob-1"></div>
     <div class="blob-2"></div>
     <div class="blob-3"></div>
+
+    <!-- Animated Veterinary Background Pattern -->
+    <div class="vet-pattern-layer"></div>
 
     <!-- ===== HEADER ===== -->
     <header class="relative z-10 w-full overflow-hidden"
@@ -224,7 +361,7 @@
             </div>
 
             <!-- ===== CENTRO: MENSAJE DE BIENVENIDA ===== -->
-            <div class="hidden md:flex items-center gap-2.5 px-6 py-2 rounded-full"
+            <div class="mr-20 hidden md:flex items-center gap-2.5 px-6 py-2 rounded-full "
                  style="background: rgba(255,255,255,0.18);
                         border: 2px dashed rgba(255,255,255,0.55);
                         backdrop-filter: blur(4px);">
@@ -239,35 +376,8 @@
                 </span>
             </div>
 
-            <!-- ===== DERECHA: STATS + BOTONES ===== -->
+            <!-- ===== DERECHA: ACCIONES ===== -->
             <div class="flex items-center gap-3 flex-shrink-0">
-
-                <!-- Badges de estadísticas (decorativos en landing) -->
-                <div class="hidden lg:flex items-center gap-3 mr-1">
-                    <!-- 12 Citas -->
-                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
-                         style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);">
-                        <svg class="w-4 h-4" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                        <span class="text-xs font-semibold" style="color:white;">12 CITAS</span>
-                    </div>
-                    <!-- 2 Alertas -->
-                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
-                         style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);">
-                        <svg class="w-4 h-4" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        <span class="text-xs font-semibold" style="color:white;">2 ALERTAS</span>
-                    </div>
-                </div>
-
-                <!-- Separador -->
-                <div class="hidden lg:block h-8 w-px" style="background: rgba(255,255,255,0.30);"></div>
-
-                <!-- Botones de navegación -->
                 <nav class="flex items-center gap-2">
                     @if (Route::has('login'))
                         @auth
@@ -284,40 +394,20 @@
                                 Ir al Dashboard
                             </a>
                         @else
-                            <!-- Botón Iniciar Sesión -->
-                            <a href="{{ route('login') }}"
-                               class="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-all"
-                               style="background: #0c4a6e; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.20);"
-                               onmouseover="this.style.background='#075985'; this.style.transform='translateY(-1px)'"
-                               onmouseout="this.style.background='#0c4a6e'; this.style.transform='translateY(0)'">
-                                <!-- Ícono candado -->
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            <button type="button"
+                               @click="activeModal = 'reset'"
+                               class="btn-help inline-flex items-center gap-1.5 text-sm font-medium px-3.5 py-1.5 rounded-lg transition-all">
+                                <svg class="question-group w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path class="question-mark" d="M8 8a3.5 3 0 0 1 3.5 -3h1a3.5 3 0 0 1 3.5 3a3 3 0 0 1 -2 3a3 4 0 0 0 -2 4" />
+                                    <path class="question-mark-dot" d="M12 19l0 .01" />
                                 </svg>
-                                Iniciar Sesión
-                            </a>
-                            <!-- Botón Registrarse -->
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}"
-                                   class="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-all"
-                                   style="background: rgba(255,255,255,0.92); color: #0369a1; border: 1px solid rgba(255,255,255,0.60);
-                                          box-shadow: 0 2px 8px rgba(0,0,0,0.10);"
-                                   onmouseover="this.style.background='white'; this.style.transform='translateY(-1px)'"
-                                   onmouseout="this.style.background='rgba(255,255,255,0.92)'; this.style.transform='translateY(0)'">
-                                    <!-- Ícono usuario+ -->
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                                    </svg>
-                                    Registrarse
-                                </a>
-                            @endif
+                                Ayuda
+                            </button>
                         @endauth
                     @endif
                 </nav>
             </div>
-
         </div>
     </header>
 
@@ -326,85 +416,109 @@
     <main class="relative z-10 flex flex-col items-center justify-center text-center px-4 pt-16 pb-12">
 
         <!-- System badge -->
-        <div class="system-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8">
-            <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background:#0ea5e9"></span>
-            <span class="text-xs font-semibold uppercase tracking-wider" style="color:#0369a1">Portal de Acceso Interno</span>
-        </div>
-
-        <!-- Main icon -->
-        <div class="relative mb-8">
-            <div class="w-28 h-28 rounded-3xl flex items-center justify-center mx-auto"
-                 style="background:linear-gradient(135deg,rgba(186,230,253,0.70) 0%,rgba(167,243,208,0.70) 100%);
-                        border:1.5px solid rgba(56,189,248,0.35);
-                        box-shadow:0 0 50px rgba(14,165,233,0.15);">
-                <svg class="w-14 h-14" style="color:#0ea5e9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M12 4.5c-1.5 0-2 1.5-2 2.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5c0-1-.5-2.5-2-2.5z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M18.5 7.5c-1.5 0-2 1.5-2 2.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5c0-1-.5-2.5-2-2.5z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M5.5 7.5c-1.5 0-2 1.5-2 2.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5c0-1-.5-2.5-2-2.5z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M12 11.5c-2.5 0-4.5 1.5-5.5 3.5-.5 1-1 2-1 3.5 0 2.5 2.5 4.5 6.5 4.5s6.5-2 6.5-4.5c0-1.5-.5-2.5-1-3.5-1-2-3-3.5-5.5-3.5z"/>
-                </svg>
+            <div class="system-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8">
+                <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background:#0ea5e9"></span>
+                <span class="text-xs font-semibold uppercase tracking-wider" style="color:#0369a1">Portal de Acceso Interno</span>
             </div>
-            <!-- Decorative ring -->
-            <div class="absolute inset-0 w-28 h-28 mx-auto rounded-3xl scale-110 opacity-50"
-                 style="border:1.5px solid rgba(56,189,248,0.25)"></div>
+
+            <!-- Contenedor Flex para alinear ícono y texto -->
+<div class="flex items-center justify-center gap-5 mb-6">
+    
+    <!-- Main icon -->
+    <div class="relative">
+        <!-- Se redujo el tamaño a w-20 h-20 para mejor proporción horizontal -->
+        <div class="w-20 h-20 rounded-3xl flex items-center justify-center"
+             style="background:linear-gradient(135deg,rgba(186,230,253,0.70) 0%,rgba(167,243,208,0.70) 100%);
+                    border:1.5px solid rgba(56,189,248,0.35);
+                    box-shadow:0 0 50px rgba(14,165,233,0.15);">
+            <svg class="w-10 h-10" style="color:#0ea5e9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M12 4.5c-1.5 0-2 1.5-2 2.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5c0-1-.5-2.5-2-2.5z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M18.5 7.5c-1.5 0-2 1.5-2 2.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5c0-1-.5-2.5-2-2.5z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M5.5 7.5c-1.5 0-2 1.5-2 2.5 0 1.5 1 2.5 2 2.5s2-1 2-2.5c0-1-.5-2.5-2-2.5z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M12 11.5c-2.5 0-4.5 1.5-5.5 3.5-.5 1-1 2-1 3.5 0 2.5 2.5 4.5 6.5 4.5s6.5-2 6.5-4.5c0-1.5-.5-2.5-1-3.5-1-2-3-3.5-5.5-3.5z"/>
+            </svg>
         </div>
+        <!-- Decorative ring -->
+        <div class="absolute inset-0 w-20 h-20 rounded-3xl scale-110 opacity-50"
+             style="border:1.5px solid rgba(56,189,248,0.25)"></div>
+    </div>
 
-        <!-- Headline -->
-        <h1 class="shimmer-text text-5xl font-extrabold tracking-tight mb-4 max-w-2xl">
-            VetCare
-        </h1>
-        <p class="text-xl font-semibold mb-3 max-w-xl" style="color:#0c4a6e">
-            Sistema de Gestión para Clínicas Veterinarias
-        </p>
-        <p class="text-base max-w-lg leading-relaxed mb-12" style="color:#475569">
-            Administra citas, clientes, mascotas y ventas desde un solo lugar.
-            Diseñado para el equipo interno de tu clínica.
-        </p>
+    <!-- Headline -->
+    <!-- Se eliminó el margen inferior para que quede centrado verticalmente con el ícono -->
+    <h1 class="shimmer-text text-5xl font-extrabold tracking-tight m-0">
+        VetCare
+    </h1>
+</div>
 
-        <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row items-center gap-4">
-            @if (Route::has('login'))
-                @auth
-                    <a href="{{ url('/dashboard') }}"
-                       id="btn-ir-dashboard"
-                       class="btn-primary inline-flex items-center gap-2.5 font-semibold text-base px-8 py-3.5 rounded-xl">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                        </svg>
-                        Ir al Dashboard
-                    </a>
-                @else
-                    <a href="{{ route('login') }}"
-                       id="btn-iniciar-sesion"
-                       class="btn-primary inline-flex items-center gap-2.5 font-semibold text-base px-8 py-3.5 rounded-xl">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-                        </svg>
-                        Iniciar Sesión
-                    </a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}"
-                           id="btn-registrarse"
-                           class="btn-secondary inline-flex items-center gap-2 font-medium text-base px-6 py-3.5 rounded-xl">
-                            <svg class="w-5 h-5" style="color:#0ea5e9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<p class="text-xl font-semibold mb-3 max-w-xl" style="color:#0c4a6e">
+    Sistema de Gestión para Clínicas Veterinarias
+</p>
+<p class="text-base max-w-lg leading-relaxed mb-10" style="color:#475569">
+    Administra citas, clientes, mascotas y ventas desde un solo lugar.
+    Diseñado para el equipo interno de tu clínica.
+</p>
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                @if (Route::has('login'))
+                    @auth
+                        <a href="{{ url('/dashboard') }}"
+                           id="btn-ir-dashboard"
+                           class="btn-primary inline-flex items-center gap-2.5 font-semibold text-base px-8 py-3.5 rounded-xl">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                             </svg>
-                            Registrar usuario
+                            Ir al Dashboard
                         </a>
-                    @endif
-                @endauth
-            @endif
-        </div>
+                    @else
+                        <button type="button"
+                           id="btn-iniciar-sesion"
+                           @click="activeModal = 'login'"
+                           class="btn-primary inline-flex items-center gap-2.5 font-semibold text-base px-8 py-3.5 rounded-xl">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="overflow: visible;">
+                                <g class="paw-inner" style="transform-origin: center;">
+                                    <circle cx="11" cy="4" r="2" />
+                                    <circle cx="18" cy="8" r="2" />
+                                    <circle cx="20" cy="16" r="2" />
+                                    <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z" />
+                                </g>
+                            </svg>
+                            Iniciar Sesión
+                        </button>
+                        @if (Route::has('register'))
+                            <button type="button"
+                               id="btn-registrarse"
+                               @click="activeModal = 'register'"
+                               class="btn-secondary border border-gray-500 hover:border-sky-700 inline-flex items-center gap-2 font-medium text-sm sm:text-base px-5 py-3 rounded-xl">
+                               <svg class="w-5 h-5" style="color:#0ea5e9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <!-- User avatar -->
+                                    <g class="user-avatar">
+                                        <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                                        <path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
+                                    </g>
+                                    <!-- Plus sign -->
+                                    <g class="plus-sign">
+                                        <path d="M16 19h6" />
+                                        <path d="M19 16v6" />
+                                    </g>
+                                </svg>
+                                Registrar Usuario
+                            </button>
+                        @endif
+                    @endauth
+                @endif
+            </div>
+
+   
 
         <!-- Divider -->
-        <div class="divider h-px w-full max-w-2xl mt-20 mb-16"></div>
+        <div class="divider bg-blue-900 h-px w-full max-w-4xl mt-16 mb-12"></div> 
 
         <!-- ===== FEATURE CARDS ===== -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl w-full px-4">
@@ -467,13 +581,75 @@
 
         </div>
     </main>
-
+ 
     <!-- ===== FOOTER ===== -->
     <footer class="relative z-10 text-center pb-8 pt-4">
         <p class="text-xs" style="color:#94a3b8">
             VetCare &copy; {{ date('Y') }} &mdash; Sistema de Gestión Interno &mdash; Uso exclusivo del personal autorizado
         </p>
     </footer>
+
+    {{-- ═══ VALIDADORES EN TIEMPO REAL ALPIINE.JS ═══ --}}
+    <script>
+        window.VetCareValidators = {
+            email(val) {
+                if (!val || val.trim() === '') {
+                    return 'El correo electrónico es obligatorio.';
+                }
+                if (/\s/.test(val)) {
+                    return 'El correo no debe contener espacios.';
+                }
+                if (/[A-Z]/.test(val)) {
+                    return 'El correo no debe contener letras mayúsculas (todo debe ser en minúsculas).';
+                }
+                if (/[ñÑáéíóúÁÉÍÓÚ]/u.test(val)) {
+                    return 'El correo no debe contener eñes ni acentos.';
+                }
+                if (/[\(\)\[\]\{\}<>":;\\,]/.test(val)) {
+                    return 'El correo contiene caracteres especiales no permitidos.';
+                }
+                const atCount = (val.match(/@/g) || []).length;
+                if (atCount === 0) {
+                    return 'El correo debe contener exactamente un símbolo @.';
+                }
+                if (atCount > 1) {
+                    return 'El correo no puede tener más de una @.';
+                }
+                if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(val)) {
+                    return 'El correo debe tener un formato y dominio válido (.com, .es, .org, etc.).';
+                }
+                return '';
+            },
+
+            name(val) {
+                if (!val || val.trim() === '') {
+                    return 'El nombre completo es obligatorio.';
+                }
+                if (/[0-9]/.test(val)) {
+                    return 'El nombre no puede contener números.';
+                }
+                if (/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/u.test(val)) {
+                    return 'El nombre solo debe contener letras, espacios, acentos y eñes.';
+                }
+                return '';
+            },
+
+            password(val) {
+                if (!val || val.trim() === '') {
+                    return 'La contraseña es obligatoria.';
+                }
+                if (val.length < 8) {
+                    return 'La contraseña debe tener al menos 8 caracteres.';
+                }
+                return '';
+            }
+        };
+    </script>
+
+    {{-- ═══ MODALS DE AUTENTICACIÓN ─ deben estar dentro del div x-data ═══ --}}
+    @include('partials.modals.modal-login')
+    @include('partials.modals.modal-register')
+    @include('partials.modals.modal-reset-password')
 
 </div>
 

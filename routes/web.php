@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthModalController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DashboardController;
@@ -8,6 +9,10 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VentaController;
 use Illuminate\Support\Facades\Route;
+
+// ── Modals de Autenticación (sin middleware — gestionados desde la landing) ──
+Route::post('/auth/modal/register', [AuthModalController::class, 'register'])->name('modal.register');
+Route::post('/auth/modal/reset-password', [AuthModalController::class, 'resetPassword'])->name('modal.reset-password');
 
 
 Route::get('/', function () {

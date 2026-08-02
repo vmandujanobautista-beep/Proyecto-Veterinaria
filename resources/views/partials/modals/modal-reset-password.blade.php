@@ -105,6 +105,7 @@
                       x-data="{
                           new_password: '',
                           new_password_confirmation: '',
+                          sending: false,
                           errors: {
                               new_password: @js($errors->first('new_password') ?: ''),
                               new_password_confirmation: @js($errors->first('new_password_confirmation') ?: '')
@@ -114,6 +115,7 @@
                                   if (val !== 'reset' && val !== 'reset_success') {
                                       this.errors.new_password = '';
                                       this.errors.new_password_confirmation = '';
+                                      this.sending = false;
                                   }
                               });
                           },
@@ -137,10 +139,11 @@
                               this.validateConfirmation();
                               if (this.errors.new_password || this.errors.new_password_confirmation) {
                                   e.preventDefault();
+                                  this.sending = false;
                               }
                           }
                       }"
-                      @submit="validateAll($event)">
+                      @submit="sending = true; validateAll($event)">
                     @csrf
                     <input type="hidden" name="email" value="{{ $verifiedEmail }}">
                     <input type="hidden" name="admin_password" value="PASSWORD">
@@ -162,9 +165,12 @@
                                    autocorrect="off"
                                    autocapitalize="off"
                                    spellcheck="false"
+                                   onpaste="return false"
+                                   oncopy="return false"
+                                   oncut="return false"
                                    placeholder="Mínimo 8 caracteres"
                                    class="w-full px-4 py-3 pr-12 rounded-xl text-sm transition-all outline-none"
-                                   style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                                   style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                                    onfocus="this.style.borderColor='#f59e0b'; this.style.boxShadow='0 0 0 3px rgba(245,158,11,0.12)';"
                                    onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                             <button type="button" @click="showP = !showP" tabindex="-1"
@@ -190,9 +196,12 @@
                                    autocorrect="off"
                                    autocapitalize="off"
                                    spellcheck="false"
+                                   onpaste="return false"
+                                   oncopy="return false"
+                                   oncut="return false"
                                    placeholder="Repite tu nueva contraseña"
                                    class="w-full px-4 py-3 pr-12 rounded-xl text-sm transition-all outline-none"
-                                   style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                                   style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                                    onfocus="this.style.borderColor='#f59e0b'; this.style.boxShadow='0 0 0 3px rgba(245,158,11,0.12)';"
                                    onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                             <button type="button" @click="showP2 = !showP2" tabindex="-1"
@@ -204,12 +213,20 @@
                         <p x-cloak x-show="errors.new_password_confirmation" x-text="errors.new_password_confirmation" class="mt-1.5 text-xs font-semibold" style="color:#dc2626;"></p>
                     </div>
 
+                    {{-- Botón Guardar con estado loading --}}
                     <button type="submit"
-                            class="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all"
+                            :disabled="sending"
+                            :class="{ 'opacity-60 cursor-not-allowed': sending }"
+                            class="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all flex items-center justify-center gap-2"
                             style="background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 4px 18px rgba(245,158,11,0.28);"
-                            onmouseover="this.style.background='linear-gradient(135deg,#fbbf24,#f59e0b)'; this.style.boxShadow='0 6px 22px rgba(245,158,11,0.40)';"
-                            onmouseout="this.style.background='linear-gradient(135deg,#f59e0b,#d97706)'; this.style.boxShadow='0 4px 18px rgba(245,158,11,0.28)';">
-                        Guardar Nueva Contraseña
+                            x-on:mouseover="if(!sending){ this.style.background='linear-gradient(135deg,#fbbf24,#f59e0b)'; this.style.boxShadow='0 6px 22px rgba(245,158,11,0.40)'; }"
+                            x-on:mouseout="if(!sending){ this.style.background='linear-gradient(135deg,#f59e0b,#d97706)'; this.style.boxShadow='0 4px 18px rgba(245,158,11,0.28)'; }">
+                        <svg x-show="sending" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        <span x-show="!sending">Guardar Nueva Contraseña</span>
+                        <span x-show="sending">Guardando...</span>
                     </button>
                 </form>
 
@@ -228,6 +245,7 @@
                       x-data="{
                           email: @js(old('email', '')),
                           admin_password: '',
+                          sending: false,
                           errors: {
                               email: @js($errors->first('email') ?: ''),
                               admin_password: @js($errors->first('admin_password') ?: '')
@@ -237,6 +255,7 @@
                                   if (val !== 'reset') {
                                       this.errors.email = '';
                                       this.errors.admin_password = '';
+                                      this.sending = false;
                                   }
                               });
                           },
@@ -255,10 +274,11 @@
                               this.validateAdminPassword();
                               if (this.errors.email || this.errors.admin_password) {
                                   e.preventDefault();
+                                  this.sending = false;
                               }
                           }
                       }"
-                      @submit="validateAll($event)">
+                      @submit="sending = true; validateAll($event)">
                     @csrf
 
                     {{-- Honeypot --}}
@@ -278,9 +298,12 @@
                                autocorrect="off"
                                autocapitalize="off"
                                spellcheck="false"
+                               onpaste="return false"
+                               oncopy="return false"
+                               oncut="return false"
                                placeholder="usuario@vetcare.com"
                                class="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none"
-                               style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                               style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                                onfocus="this.style.borderColor='#f59e0b'; this.style.boxShadow='0 0 0 3px rgba(245,158,11,0.12)';"
                                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                         <p x-cloak x-show="errors.email" x-text="errors.email" class="mt-1.5 text-xs font-semibold" style="color:#dc2626;"></p>
@@ -299,21 +322,32 @@
                                autocorrect="off"
                                autocapitalize="off"
                                spellcheck="false"
+                               onpaste="return false"
+                               oncopy="return false"
+                               oncut="return false"
                                placeholder="Requerida para autorizar el cambio"
                                class="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none"
-                               style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                               style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                                onfocus="this.style.borderColor='#f59e0b'; this.style.boxShadow='0 0 0 3px rgba(245,158,11,0.12)';"
                                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                         <p class="mt-1.5 text-xs" style="color:#94a3b8;">⚠️ Solo un administrador puede autorizar el reseteo.</p>
                         <p x-cloak x-show="errors.admin_password" x-text="errors.admin_password" class="mt-1.5 text-xs font-semibold" style="color:#dc2626;"></p>
                     </div>
 
+                    {{-- Botón Verificar con estado loading --}}
                     <button type="submit"
-                            class="w-full py-3.5 rounded-xl font-semibold text-white text-sm transition-all"
+                            :disabled="sending"
+                            :class="{ 'opacity-60 cursor-not-allowed': sending }"
+                            class="w-full py-3.5 rounded-xl font-semibold text-white text-sm transition-all flex items-center justify-center gap-2"
                             style="background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 4px 18px rgba(245,158,11,0.28);"
-                            onmouseover="this.style.background='linear-gradient(135deg,#fbbf24,#f59e0b)'; this.style.boxShadow='0 6px 22px rgba(245,158,11,0.40)';"
-                            onmouseout="this.style.background='linear-gradient(135deg,#f59e0b,#d97706)'; this.style.boxShadow='0 4px 18px rgba(245,158,11,0.28)';">
-                        Verificar Identidad
+                            x-on:mouseover="if(!sending){ this.style.background='linear-gradient(135deg,#fbbf24,#f59e0b)'; this.style.boxShadow='0 6px 22px rgba(245,158,11,0.40)'; }"
+                            x-on:mouseout="if(!sending){ this.style.background='linear-gradient(135deg,#f59e0b,#d97706)'; this.style.boxShadow='0 4px 18px rgba(245,158,11,0.28)'; }">
+                        <svg x-show="sending" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        <span x-show="!sending">Verificar Identidad</span>
+                        <span x-show="sending">Verificando...</span>
                     </button>
                 </form>
             @endif

@@ -80,6 +80,7 @@
                   x-data="{
                       email: @js(old('email', '')),
                       password: '',
+                      sending: false,
                       errors: {
                           email: @js($errors->first('email') ?: ''),
                           password: @js($errors->first('password') ?: '')
@@ -89,6 +90,7 @@
                               if (val !== 'login') {
                                   this.errors.email = '';
                                   this.errors.password = '';
+                                  this.sending = false;
                               }
                           });
                       },
@@ -107,10 +109,11 @@
                           this.validatePassword();
                           if (this.errors.email || this.errors.password) {
                               e.preventDefault();
+                              this.sending = false;
                           }
                       }
                   }"
-                  @submit="validateAll($event)"
+                  @submit="sending = true; validateAll($event)"
             >
                 @csrf
 
@@ -137,9 +140,12 @@
                         autocorrect="off"
                         autocapitalize="off"
                         spellcheck="false"
+                        onpaste="return false"
+                        oncopy="return false"
+                        oncut="return false"
                         placeholder="correo@vetcare.com"
                         class="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none"
-                        style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                        style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                         onfocus="this.style.borderColor='#0ea5e9'; this.style.boxShadow='0 0 0 3px rgba(14,165,233,0.12)';"
                         onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
                     >
@@ -165,9 +171,12 @@
                             autocorrect="off"
                             autocapitalize="off"
                             spellcheck="false"
+                            onpaste="return false"
+                            oncopy="return false"
+                            oncut="return false"
                             placeholder="••••••••"
                             class="w-full px-4 py-3 pr-12 rounded-xl text-sm transition-all outline-none"
-                            style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                            style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                             onfocus="this.style.borderColor='#0ea5e9'; this.style.boxShadow='0 0 0 3px rgba(14,165,233,0.12)';"
                             onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
                         >
@@ -186,19 +195,21 @@
                     <p x-cloak x-show="errors.password" x-text="errors.password" class="mt-1.5 text-xs font-semibold" style="color:#dc2626;"></p>
                 </div>
 
-                {{-- Recordarme --}}
-                <div class="flex items-center mb-4">
-                    <input type="checkbox" name="remember" id="login_remember" style="accent-color:#0ea5e9; width:16px; height:16px;">
-                    <label for="login_remember" class="ml-2 text-sm" style="color:#64748b;">Recordar sesión</label>
-                </div>
-
-                {{-- Botón Entrar --}}
+                {{-- Botón Entrar con estado loading --}}
                 <button type="submit"
-                        class="w-full py-3.5 rounded-xl font-semibold text-white text-sm transition-all"
+                        :disabled="sending"
+                        :class="{ 'opacity-60 cursor-not-allowed': sending }"
+                        class="w-full py-3.5 rounded-xl font-semibold text-white text-sm transition-all flex items-center justify-center gap-2"
                         style="background:linear-gradient(135deg,#0ea5e9,#3b82f6); box-shadow:0 4px 18px rgba(14,165,233,0.30);"
-                        onmouseover="this.style.background='linear-gradient(135deg,#38bdf8,#60a5fa)'; this.style.boxShadow='0 6px 22px rgba(14,165,233,0.45)';"
-                        onmouseout="this.style.background='linear-gradient(135deg,#0ea5e9,#3b82f6)'; this.style.boxShadow='0 4px 18px rgba(14,165,233,0.30)';">
-                    Entrar al Sistema
+                        x-on:mouseover="if(!sending){ this.style.background='linear-gradient(135deg,#38bdf8,#60a5fa)'; this.style.boxShadow='0 6px 22px rgba(14,165,233,0.45)'; }"
+                        x-on:mouseout="if(!sending){ this.style.background='linear-gradient(135deg,#0ea5e9,#3b82f6)'; this.style.boxShadow='0 4px 18px rgba(14,165,233,0.30)'; }">
+                    {{-- Spinner SVG --}}
+                    <svg x-show="sending" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span x-show="!sending">Entrar al Sistema</span>
+                    <span x-show="sending">Verificando...</span>
                 </button>
             </form>
 

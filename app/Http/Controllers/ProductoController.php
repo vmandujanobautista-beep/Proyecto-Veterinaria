@@ -25,8 +25,11 @@ class ProductoController extends Controller
 
         $productos = $query->paginate(10)->withQueryString();
 
-        // Productos con stock bajo para la alerta
-        $stockBajo = Producto::where('stock', '<=', 5)->get();
+        // Productos con stock bajo para la alerta (solo columnas necesarias)
+        $stockBajo = Producto::select(['id', 'nombre', 'codigo', 'stock'])
+                             ->where('stock', '<=', 5)
+                             ->orderBy('stock')
+                             ->get();
 
         return view('productos.index', compact('productos', 'stockBajo'));
     }

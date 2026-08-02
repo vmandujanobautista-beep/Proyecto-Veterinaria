@@ -14,7 +14,9 @@ class VentaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Venta::with(['cliente', 'mascota', 'user', 'ventaProductos.producto'])->latest();
+        $query = Venta::with(['cliente:id,nombre,apellido', 'mascota:id,nombre', 'user:id,name', 'ventaProductos.producto:id,nombre,precio'])
+                      ->select(['id', 'cliente_id', 'mascota_id', 'user_id', 'metodo_pago', 'estado', 'total', 'created_at'])
+                      ->latest();
 
         if ($buscar = $request->input('buscar')) {
             $query->where(function ($q) use ($buscar) {
@@ -37,14 +39,22 @@ class VentaController extends Controller
 
         $ventas = $query->paginate(10)->withQueryString();
 
-        // KPIs del encabezado
-        $hoy          = now()->toDateString();
-        $totalHoy     = Venta::whereDate('created_at', $hoy)->sum('total');
-        $ventasHoy    = Venta::whereDate('created_at', $hoy)->count();
-        $totalMes     = Venta::whereMonth('created_at', now()->month)
-                             ->whereYear('created_at', now()->year)->sum('total');
-        $ventasMes    = Venta::whereMonth('created_at', now()->month)
-                             ->whereYear('created_at', now()->year)->count();
+        // KPIs del encabezado — agrupados para reducir queries
+        $hoy = now()->toDateString();
+
+        $kpisHoy = Venta::selectRaw('COUNT(*) as count, COALESCE(SUM(total), 0) as sum')
+                        ->whereDate('created_at', $hoy)
+                        ->first();
+
+        $kpisMes = Venta::selectRaw('COUNT(*) as count, COALESCE(SUM(total), 0) as sum')
+                        ->whereMonth('created_at', now()->month)
+                        ->whereYear('created_at', now()->year)
+                        ->first();
+
+        $totalHoy     = $kpisHoy->sum  ?? 0;
+        $ventasHoy    = $kpisHoy->count ?? 0;
+        $totalMes     = $kpisMes->sum  ?? 0;
+        $ventasMes    = $kpisMes->count ?? 0;
         $totalGeneral = Venta::sum('total');
         $totalVentas  = Venta::count();
 

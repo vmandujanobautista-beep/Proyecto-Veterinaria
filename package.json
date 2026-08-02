@@ -19,6 +19,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "motion": "^12.43.0"
+        "motion": "^12.43.0",
+        "puppeteer": "^25.4.0"
     }
 }

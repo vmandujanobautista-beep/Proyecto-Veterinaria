@@ -36,9 +36,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // Las rutas de la página de perfil anterior se eliminan porque ahora usamos el Modal.
+
+    // Modal de Perfil — actualización vía JSON (Alpine.js fetch)
+    Route::post('/perfil/actualizar', [ProfileController::class, 'actualizarPerfil'])->name('perfil.actualizar');
 });
 
 require __DIR__.'/auth.php';

@@ -23,6 +23,10 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'fecha_nacimiento',
+        'telefono',
+        'direccion',
+        'fecha_nacimiento_bloqueada',
     ];
 
     /**
@@ -43,8 +47,10 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at'           => 'datetime',
+            'password'                    => 'hashed',
+            'fecha_nacimiento'            => 'date',
+            'fecha_nacimiento_bloqueada'  => 'boolean',
         ];
     }
 }

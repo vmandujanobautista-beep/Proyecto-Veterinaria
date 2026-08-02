@@ -83,6 +83,7 @@
                       password: '',
                       password_confirmation: '',
                       admin_password: '',
+                      sending: false,
                       errors: {
                           name: @js($errors->first('name') ?: ''),
                           email: @js($errors->first('email') ?: ''),
@@ -98,6 +99,7 @@
                                   this.errors.password = '';
                                   this.errors.password_confirmation = '';
                                   this.errors.admin_password = '';
+                                  this.sending = false;
                               }
                           });
                       },
@@ -137,10 +139,11 @@
                           this.validateAdminPassword();
                           if (this.errors.name || this.errors.email || this.errors.password || this.errors.password_confirmation || this.errors.admin_password) {
                               e.preventDefault();
+                              this.sending = false;
                           }
                       }
                   }"
-                  @submit="validateAll($event)"
+                  @submit="sending = true; validateAll($event)"
             >
                 @csrf
 
@@ -162,9 +165,12 @@
                            autocorrect="off"
                            autocapitalize="off"
                            spellcheck="false"
+                           onpaste="return false"
+                           oncopy="return false"
+                           oncut="return false"
                            placeholder="Ej: María García"
                            class="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none"
-                           style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                           style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                            onfocus="this.style.borderColor='#059669'; this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.12)';"
                            onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                     <p x-cloak x-show="errors.name" x-text="errors.name" class="mt-1.5 text-xs font-semibold" style="color:#dc2626;"></p>
@@ -183,9 +189,12 @@
                            autocorrect="off"
                            autocapitalize="off"
                            spellcheck="false"
+                           onpaste="return false"
+                           oncopy="return false"
+                           oncut="return false"
                            placeholder="usuario@vetcare.com"
                            class="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none"
-                           style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                           style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                            onfocus="this.style.borderColor='#059669'; this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.12)';"
                            onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                     <p x-cloak x-show="errors.email" x-text="errors.email" class="mt-1.5 text-xs font-semibold" style="color:#dc2626;"></p>
@@ -205,9 +214,12 @@
                                autocorrect="off"
                                autocapitalize="off"
                                spellcheck="false"
+                               onpaste="return false"
+                               oncopy="return false"
+                               oncut="return false"
                                placeholder="Mínimo 8 caracteres"
                                class="w-full px-4 py-3 pr-12 rounded-xl text-sm transition-all outline-none"
-                               style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                               style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                                onfocus="this.style.borderColor='#059669'; this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.12)';"
                                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                         <button type="button" @click="showP = !showP" tabindex="-1"
@@ -233,9 +245,12 @@
                                autocorrect="off"
                                autocapitalize="off"
                                spellcheck="false"
+                               onpaste="return false"
+                               oncopy="return false"
+                               oncut="return false"
                                placeholder="Repite la contraseña"
                                class="w-full px-4 py-3 pr-12 rounded-xl text-sm transition-all outline-none"
-                               style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                               style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                                onfocus="this.style.borderColor='#059669'; this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.12)';"
                                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                         <button type="button" @click="showP2 = !showP2" tabindex="-1"
@@ -260,22 +275,32 @@
                            autocorrect="off"
                            autocapitalize="off"
                            spellcheck="false"
+                           onpaste="return false"
+                           oncopy="return false"
+                           oncut="return false"
                            placeholder="Requerida para registrar usuarios"
                            class="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none"
-                           style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc; user-select:text; -webkit-user-select:text;"
+                           style="border:1.5px solid #e2e8f0; color:#1e293b; background:#f8fafc;"
                            onfocus="this.style.borderColor='#f59e0b'; this.style.boxShadow='0 0 0 3px rgba(245,158,11,0.12)';"
                            onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
                     <p class="mt-1.5 text-xs" style="color:#94a3b8;">⚠️ Solicita esta contraseña al administrador del sistema.</p>
                     <p x-cloak x-show="errors.admin_password" x-text="errors.admin_password" class="mt-1.5 text-xs font-semibold" style="color:#dc2626;"></p>
                 </div>
 
-                {{-- Botón Registrar --}}
+                {{-- Botón Registrar con estado loading --}}
                 <button type="submit"
-                        class="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all"
+                        :disabled="sending"
+                        :class="{ 'opacity-60 cursor-not-allowed': sending }"
+                        class="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all flex items-center justify-center gap-2"
                         style="background:linear-gradient(135deg,#059669,#10b981); box-shadow:0 4px 18px rgba(5,150,105,0.28);"
-                        onmouseover="this.style.background='linear-gradient(135deg,#10b981,#34d399)'; this.style.boxShadow='0 6px 22px rgba(5,150,105,0.40)';"
-                        onmouseout="this.style.background='linear-gradient(135deg,#059669,#10b981)'; this.style.boxShadow='0 4px 18px rgba(5,150,105,0.28)';">
-                    Registrar Usuario
+                        x-on:mouseover="if(!sending){ this.style.background='linear-gradient(135deg,#10b981,#34d399)'; this.style.boxShadow='0 6px 22px rgba(5,150,105,0.40)'; }"
+                        x-on:mouseout="if(!sending){ this.style.background='linear-gradient(135deg,#059669,#10b981)'; this.style.boxShadow='0 4px 18px rgba(5,150,105,0.28)'; }">
+                    <svg x-show="sending" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span x-show="!sending">Registrar Usuario</span>
+                    <span x-show="sending">Registrando...</span>
                 </button>
             </form>
 

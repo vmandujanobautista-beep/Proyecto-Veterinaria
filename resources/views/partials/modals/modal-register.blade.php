@@ -71,7 +71,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('modal.register') }}"
+            <form method="POST" action="{{ route('modal.register', [], false) }}"
                   role="presentation"
                   autocomplete="off"
                   autocorrect="off"
@@ -94,6 +94,11 @@
                       init() {
                           this.$watch('activeModal', val => {
                               if (val !== 'register') {
+                                  this.name = '';
+                                  this.email = '';
+                                  this.password = '';
+                                  this.password_confirmation = '';
+                                  this.admin_password = '';
                                   this.errors.name = '';
                                   this.errors.email = '';
                                   this.errors.password = '';

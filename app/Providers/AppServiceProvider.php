@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Forzar que todas las rutas usen el host actual de la petición,
+        // evitando errores 419 Page Expired por cruce entre localhost y 127.0.0.1
+        if (request()->root()) {
+            \Illuminate\Support\Facades\URL::forceRootUrl(request()->root());
+        }
     }
 }

@@ -16,6 +16,8 @@ class Mascota extends Model
         'peso',
         'fecha_nacimiento',
         'nota_medica',
+        'foto',
+        'color_pelaje',
         'cliente_id',
     ];
 

@@ -24,8 +24,8 @@ class ValidNameRule implements ValidationRule
             return;
         }
 
-        if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u', $value)) {
-            $fail('El nombre solo debe contener letras, espacios, acentos y eñes.');
+        if (!preg_match('/^[a-zA-Z\s]+$/', $value)) {
+            $fail('El nombre solo debe contener letras y espacios. No se permiten números ni caracteres especiales.');
             return;
         }
     }

@@ -70,8 +70,16 @@
                 </div>
             @endif
 
-            {{-- Formulario Login → POST /login de Breeze --}}
-            <form method="POST" action="{{ route('login') }}"
+            {{-- Alerta de error si hubo problema de sesión (419) o credenciales --}}
+            @if ($errors->any())
+                <div class="mb-5 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2.5" style="background:#fef2f2; border:1px solid #fecaca; color:#991b1b;">
+                    <span>⚠️</span>
+                    <span>{{ $errors->first('email') ?: $errors->first() }}</span>
+                </div>
+            @endif
+
+            {{-- Formulario Login → POST /login de Breeze con URL relativa para evitar problemas de cookie domain / CORS --}}
+            <form method="POST" action="{{ route('login', [], false) }}"
                   role="presentation"
                   autocomplete="off"
                   autocorrect="off"
@@ -88,6 +96,8 @@
                       init() {
                           this.$watch('activeModal', val => {
                               if (val !== 'login') {
+                                  this.email = '';
+                                  this.password = '';
                                   this.errors.email = '';
                                   this.errors.password = '';
                                   this.sending = false;

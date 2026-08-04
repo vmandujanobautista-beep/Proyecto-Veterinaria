@@ -281,9 +281,21 @@
 
 <div class="landing-bg relative"
      x-data="{ activeModal: @js(session('open_modal') ?? session('success_modal') ?? ($errors->any() ? 'login' : null)) }"
-     x-init="if ('{{ session('success_modal') }}' === 'reset_success') {
-         setTimeout(() => { activeModal = 'login'; }, 2000);
-     }">
+     x-init="
+         $watch('activeModal', val => {
+             if (val) {
+                 document.body.style.overflow = 'hidden';
+             } else {
+                 document.body.style.overflow = '';
+             }
+         });
+         // Trigger inicial por si carga con un modal abierto
+         if (activeModal) document.body.style.overflow = 'hidden';
+         
+         if ('{{ session('success_modal') }}' === 'reset_success') {
+             setTimeout(() => { activeModal = 'login'; }, 2000);
+         }
+     ">
 
     <!-- Soft blobs -->
     <div class="blob-1"></div>

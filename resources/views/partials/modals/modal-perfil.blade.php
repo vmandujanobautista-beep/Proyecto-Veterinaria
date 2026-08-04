@@ -52,16 +52,41 @@
             emailOrig:@js($u->email),
 
             {{-- ── Campos siempre editables ── --}}
+            codigoPais:       @js($u->codigo_pais ?? '+1'),
             telefono:         @js($u->telefono ?? ''),
             direccion:        @js($u->direccion ?? ''),
             fechaNacimiento:  @js($fnFormato),
             fnBloqueada:      @js($fnBloqueada),
+
+            {{-- ── Contraseñas ── --}}
+            currentPassword: '',
+            password: '',
+            passwordConfirmation: '',
+            showCurrent: false,
+            showNew: false,
+            showConfirm: false,
 
             {{-- ── Estado del envío ── --}}
             sending:   false,
             success:   false,
             errorMsg:  '',
             fieldErrors: {},
+
+            init() {
+                this.$watch('profileOpen', (val) => {
+                    if (!val) {
+                        // Limpiar errores al cerrar
+                        this.errorMsg = '';
+                        this.fieldErrors = {};
+                        // Revertir estado de edición si quedó abierto
+                        if (this.editando) {
+                            this.name  = this.nameOrig;
+                            this.email = this.emailOrig;
+                            this.editando = false;
+                        }
+                    }
+                });
+            },
 
             toggleEditar() {
                 if (this.editando) {
@@ -75,13 +100,18 @@
                 this.sending    = true;
                 this.errorMsg   = '';
                 this.fieldErrors = {};
+                this.$dispatch('show-loader');
 
                 const payload = {
                     name:             this.name,
                     email:            this.email,
+                    codigo_pais:      this.codigoPais,
                     telefono:         this.telefono,
                     direccion:        this.direccion,
-                    fecha_nacimiento: this.fnBloqueada ? null : this.fechaNacimiento
+                    fecha_nacimiento: this.fnBloqueada ? null : this.fechaNacimiento,
+                    current_password: this.currentPassword,
+                    password:         this.password,
+                    password_confirmation: this.passwordConfirmation
                 };
 
                 try {
@@ -112,6 +142,7 @@
                         setTimeout(() => {
                             this.success    = false;
                             profileOpen     = false;
+                            window.location.reload();
                         }, 2200);
                     } else if (res.status === 422 && data.errors) {
                         this.fieldErrors = data.errors;
@@ -123,6 +154,7 @@
                     this.errorMsg = 'Error de red. Verifica tu conexión e intenta de nuevo.';
                 } finally {
                     this.sending = false;
+                    this.$dispatch('hide-loader');
                 }
             }
         }"
@@ -208,6 +240,7 @@
                         <input
                             type="text"
                             x-model="name"
+                            @input="name = name.replace(/[^a-zA-Z\s]/g, '')"
                             :readonly="!editando"
                             :style="editando
                                 ? 'border:1.5px solid #3b82f6; background:#f8fafc; color:#1e293b;'
@@ -233,6 +266,7 @@
                         <input
                             type="text"
                             x-model="email"
+                            @input="email = email.toLowerCase().replace(/[\sñáéíóúÁÉÍÓÚÑ\[\]{}<>\"':;\\]/g, '')"
                             :readonly="!editando"
                             :style="editando
                                 ? 'border:1.5px solid #3b82f6; background:#f8fafc; color:#1e293b;'
@@ -276,24 +310,50 @@
                         </template>
                     </div>
 
-                    {{-- Teléfono y Dirección en fila --}}
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold mb-1.5" style="color:#374151;">Teléfono</label>
-                            <input
-                                type="tel"
-                                x-model="telefono"
-                                placeholder="Ej: +52 999 000 0000"
-                                class="w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all"
-                                style="border:1.5px solid #e2e8f0; background:#f8fafc; color:#1e293b;"
-                                autocomplete="off"
-                                onpaste="return false"
-                                oncopy="return false"
-                                onfocus="this.style.borderColor='#0ea5e9'; this.style.boxShadow='0 0 0 3px rgba(14,165,233,0.12)';"
-                                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
-                            >
-                            <template x-if="fieldErrors.telefono">
-                                <p class="mt-1 text-xs font-semibold" style="color:#dc2626;" x-text="fieldErrors.telefono[0]"></p>
+                            <div class="flex">
+                                <select x-model="codigoPais"
+                                        class="px-3 py-2.5 rounded-l-xl text-sm outline-none transition-all border-r-0"
+                                        style="border:1.5px solid #e2e8f0; background:#f8fafc; color:#1e293b; width: 110px;"
+                                        onfocus="this.style.borderColor='#0ea5e9'; this.style.boxShadow='0 0 0 3px rgba(14,165,233,0.12)';"
+                                        onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
+                                    <option value="+1">🇺🇸/🇨🇦 +1</option>
+                                    <option value="+52">🇲🇽 +52</option>
+                                    <option value="+57">🇨🇴 +57</option>
+                                    <option value="+54">🇦🇷 +54</option>
+                                    <option value="+56">🇨🇱 +56</option>
+                                    <option value="+51">🇵🇪 +51</option>
+                                    <option value="+58">🇻🇪 +58</option>
+                                    <option value="+593">🇪🇨 +593</option>
+                                    <option value="+502">🇬🇹 +502</option>
+                                    <option value="+53">🇨🇺 +53</option>
+                                    <option value="+591">🇧🇴 +591</option>
+                                    <option value="+504">🇭🇳 +504</option>
+                                    <option value="+595">🇵🇾 +595</option>
+                                    <option value="+503">🇸🇻 +503</option>
+                                    <option value="+505">🇳🇮 +505</option>
+                                    <option value="+506">🇨🇷 +506</option>
+                                    <option value="+507">🇵🇦 +507</option>
+                                    <option value="+34">🇪🇸 +34</option>
+                                    <option value="+44">🇬🇧 +44</option>
+                                </select>
+                                <input
+                                    type="tel"
+                                    x-model="telefono"
+                                    placeholder="Ej: 999 000 0000"
+                                    class="flex-1 px-4 py-2.5 rounded-r-xl text-sm outline-none transition-all"
+                                    style="border:1.5px solid #e2e8f0; background:#f8fafc; color:#1e293b;"
+                                    autocomplete="off"
+                                    onpaste="return false"
+                                    oncopy="return false"
+                                    onfocus="this.style.borderColor='#0ea5e9'; this.style.boxShadow='0 0 0 3px rgba(14,165,233,0.12)';"
+                                    onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
+                                >
+                            </div>
+                            <template x-if="fieldErrors.telefono || fieldErrors.codigo_pais">
+                                <p class="mt-1 text-xs font-semibold" style="color:#dc2626;" x-text="(fieldErrors.telefono || fieldErrors.codigo_pais)[0]"></p>
                             </template>
                         </div>
                         <div>
@@ -320,10 +380,6 @@
             </div>
 
 
-
-            {{-- ════════════════════════════════
-                 BOTÓN ACTUALIZAR PERFIL
-            ════════════════════════════════ --}}
             <button
                 type="button"
                 @click="enviar()"

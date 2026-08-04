@@ -70,76 +70,70 @@ class AuthModalController extends Controller
     }
 
     /**
+     * Verifica si un correo electrónico existe en el sistema mediante AJAX.
+     * Fase 1 del flujo de Recuperar Contraseña.
+     */
+    public function verifyEmail(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'string', new ValidEmailRule],
+        ]);
+
+        $exists = User::where('email', $request->email)->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
+
+    /**
      * Restablece la contraseña de un usuario existente.
      * Requiere el email del usuario y la contraseña de administrador.
-     *
-     * El proceso tiene dos fases:
-     *   Fase 1 (POST sin new_password): valida email + admin_password, retorna confirmación de usuario encontrado.
-     *   Fase 2 (POST con new_password): actualiza la contraseña.
+     * Fase 2 del flujo de Recuperar Contraseña.
      */
     public function resetPassword(Request $request)
     {
-        // Si ya se está enviando la nueva contraseña (fase 2)
-        if ($request->has('new_password')) {
-            $request->validate([
-                'email'             => ['required', 'string', new ValidEmailRule, 'exists:users,email'],
-                'admin_password'    => ['required', 'string'],
-                'new_password'      => [
-                    'required',
-                    'confirmed',
-                    Password::min(8),
-                    function ($attribute, $value, $fail) use ($request) {
-                        if ($request->filled('email')) {
-                            $user = User::where('email', $request->email)->first();
-                            if ($user && Hash::check($value, $user->password)) {
-                                $fail('La nueva contraseña no puede ser igual a la contraseña actual.');
-                            }
+        $request->validate([
+            'email'             => ['required', 'string', new ValidEmailRule, 'exists:users,email'],
+            'admin_password'    => ['required', 'string'],
+            'new_password'      => [
+                'required',
+                'confirmed',
+                Password::min(8),
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->filled('email')) {
+                        $user = User::where('email', $request->email)->first();
+                        if ($user && Hash::check($value, $user->password)) {
+                            $fail('La nueva contraseña no puede ser igual a la contraseña actual.');
                         }
                     }
-                ],
-            ], [
-                'email.exists'              => 'No existe un usuario con ese correo.',
-                'new_password.required'     => 'La nueva contraseña es obligatoria.',
-                'new_password.confirmed'    => 'Las contraseñas no coinciden.',
-                'new_password.min'          => 'La contraseña debe tener al menos 8 caracteres.',
-                'admin_password.required'   => 'La contraseña de administrador es obligatoria.',
-            ]);
-
-            if ($request->admin_password !== self::ADMIN_PASSWORD) {
-                return back()
-                    ->withErrors(['admin_password' => 'La contraseña de administrador es incorrecta.'])
-                    ->withInput($request->except('admin_password', 'new_password', 'new_password_confirmation'))
-                    ->with('open_modal', 'reset');
-            }
-
-            $user = User::where('email', $request->email)->firstOrFail();
-            $user->update(['password' => Hash::make($request->new_password)]);
-
-            return redirect('/')
-                ->with('success_modal', 'reset_success')
-                ->with('success_message', '¡Contraseña actualizada con éxito! Ahora puedes iniciar sesión con tu nueva contraseña.');
-        }
-
-        // Fase 1: verificar que el email y contraseña admin son correctos
-        $request->validate([
-            'email'          => ['required', 'string', new ValidEmailRule, 'exists:users,email'],
-            'admin_password' => ['required', 'string'],
+                }
+            ],
         ], [
-            'email.required'         => 'El correo electrónico es obligatorio.',
-            'email.exists'           => 'No existe un usuario con ese correo.',
-            'admin_password.required'=> 'La contraseña de administrador es obligatoria.',
+            'email.exists'              => 'No existe un usuario con ese correo.',
+            'new_password.required'     => 'La nueva contraseña es obligatoria.',
+            'new_password.confirmed'    => 'Las contraseñas no coinciden.',
+            'new_password.min'          => 'La contraseña debe tener al menos 8 caracteres.',
+            'admin_password.required'   => 'La contraseña de administrador es obligatoria.',
         ]);
 
         if ($request->admin_password !== self::ADMIN_PASSWORD) {
+            if ($request->expectsJson()) {
+                return response()->json(['errors' => ['admin_password' => ['La contraseña de administrador es incorrecta.']]], 422);
+            }
             return back()
                 ->withErrors(['admin_password' => 'La contraseña de administrador es incorrecta.'])
-                ->withInput($request->except('admin_password'))
+                ->withInput($request->except('admin_password', 'new_password', 'new_password_confirmation'))
                 ->with('open_modal', 'reset');
         }
 
-        // Verificación OK → redirige de vuelta con flag para mostrar fase 2
+        $user = User::where('email', $request->email)->firstOrFail();
+        $user->update(['password' => Hash::make($request->new_password)]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return redirect('/')
-            ->with('open_modal', 'reset')
-            ->with('reset_verified_email', $request->email);
+            ->with('success_modal', 'reset_success')
+            ->with('success_message', '¡Contraseña actualizada con éxito! Ahora puedes iniciar sesión con tu nueva contraseña.');
     }
 }

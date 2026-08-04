@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 // ── Modals de Autenticación (sin middleware — gestionados desde la landing) ──
 Route::post('/auth/modal/register', [AuthModalController::class, 'register'])->name('modal.register');
+Route::post('/auth/modal/verify-email', [AuthModalController::class, 'verifyEmail'])->name('modal.verify-email');
 Route::post('/auth/modal/reset-password', [AuthModalController::class, 'resetPassword'])->name('modal.reset-password');
 
 
@@ -26,6 +27,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('clientes', ClienteController::class);
+
+    // Rutas AJAX para el modal "Nuevo Cliente"
+    Route::post('/clientes/modal-store', [ClienteController::class, 'storeModal'])->name('clientes.modal-store');
+    Route::post('/clientes/{cliente}/mascotas-modal', [ClienteController::class, 'storeMascotaModal'])->name('clientes.mascotas-modal');
+
     Route::resource('mascotas', MascotaController::class);
     Route::resource('citas', CitaController::class);
     Route::resource('productos', ProductoController::class);

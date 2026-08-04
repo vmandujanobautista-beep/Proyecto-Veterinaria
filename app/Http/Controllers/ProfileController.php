@@ -24,8 +24,9 @@ class ProfileController extends Controller
 
         // ── Reglas base ────────────────────────────────────────────────────
         $rules = [
-            'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'name'      => ['required', new \App\Rules\ValidNameRule()],
+            'email'     => ['required', new \App\Rules\ValidStrictEmailRule(), Rule::unique('users')->ignore($user->id)],
+            'codigo_pais'=>['nullable', 'string', 'max:10'],
             'telefono'  => ['nullable', 'string', 'max:20', 'regex:/^[0-9\s\+\-\(\)]+$/'],
             'direccion' => ['nullable', 'string', 'max:255'],
         ];
@@ -38,7 +39,16 @@ class ProfileController extends Controller
             'telefono.regex'    => 'El teléfono solo puede contener números, espacios y los caracteres + - ( ).',
             'telefono.max'      => 'El teléfono no puede superar los 20 caracteres.',
             'direccion.max'     => 'La dirección no puede superar los 255 caracteres.',
+            'password.min'      => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed'=> 'La confirmación de la contraseña no coincide.',
+            'current_password.current_password' => 'La contraseña actual es incorrecta.',
         ];
+
+        // ── Contraseña (opcional) ──────────────────────────────────────────
+        if ($request->filled('current_password') || $request->filled('password')) {
+            $rules['current_password'] = ['required', 'current_password'];
+            $rules['password']         = ['required', 'string', 'min:8', 'confirmed'];
+        }
 
         // ── Fecha de nacimiento: solo validar si aún no está bloqueada ─────
         if (! $user->fecha_nacimiento_bloqueada) {
@@ -46,8 +56,6 @@ class ProfileController extends Controller
             $messages['fecha_nacimiento.before_or_equal'] = 'La fecha de nacimiento no puede ser una fecha futura.';
             $messages['fecha_nacimiento.date']            = 'La fecha de nacimiento no es válida.';
         }
-
-
 
         // ── Validar ────────────────────────────────────────────────────────
         $validated = $request->validate($rules, $messages);
@@ -60,8 +68,13 @@ class ProfileController extends Controller
             $user->email_verified_at = null;
         }
 
+        $user->codigo_pais = $validated['codigo_pais'] ?? '+1';
         $user->telefono  = $validated['telefono']  ?? null;
         $user->direccion = $validated['direccion'] ?? null;
+
+        if (isset($validated['password'])) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        }
 
         // Fecha de nacimiento: guardar y bloquear en la primera vez
         if (! $user->fecha_nacimiento_bloqueada && isset($validated['fecha_nacimiento'])) {

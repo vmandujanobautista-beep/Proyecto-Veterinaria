@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'role',
         'fecha_nacimiento',
+        'codigo_pais',
         'telefono',
         'direccion',
         'fecha_nacimiento_bloqueada',

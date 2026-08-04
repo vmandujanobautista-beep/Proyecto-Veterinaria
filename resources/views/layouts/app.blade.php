@@ -17,6 +17,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
+        [x-cloak] { display: none !important; }
         body { font-family: 'Inter', sans-serif; }
 
         /* Sidebar gradient */
@@ -66,8 +67,12 @@
 </head>
 <body class="bg-slate-100 antialiased">
 
-{{-- Alpine scope global: profileOpen controla el modal de perfil --}}
-<div class="flex h-screen overflow-hidden" x-data="{ profileOpen: false }">
+{{-- Alpine scope global: profileOpen controla el modal de perfil, pageLoading el loader --}}
+<div class="flex h-screen overflow-hidden"
+     x-data="{ profileOpen: false, clienteModalOpen: false, pageLoading: false }"
+     @show-loader.window="pageLoading = true; setTimeout(() => { pageLoading = false }, 8000);"
+     @hide-loader.window="pageLoading = false"
+     @loading.window="$event.detail ? (pageLoading = true, setTimeout(() => { pageLoading = false }, 8000)) : (pageLoading = false)">
 
     <!-- ===== SIDEBAR ===== -->
     <aside id="sidebar" class="vet-sidebar w-72 flex-shrink-0 flex flex-col transition-all duration-300 z-40">
@@ -341,6 +346,15 @@
 
     {{-- ===== MODAL DE PERFIL ===== --}}
     @include('partials.modals.modal-perfil')
+
+    {{-- ===== MODAL NUEVO CLIENTE ===== --}}
+    @include('partials.modals.modal-nuevo-cliente')
+
+    {{-- ===== MODAL VER CLIENTE ===== --}}
+    @include('partials.modals.modal-ver-cliente')
+
+    {{-- ===== LOADING SCREEN ===== --}}
+    <x-loading-screen />
 
 </div>{{-- /Alpine x-data profileOpen --}}
 

@@ -63,6 +63,55 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Global button animations */
+        .btn-emerald-pulse {
+            border: none;
+            color: #fff;
+            background-image: linear-gradient(30deg, #059669, #34d399);
+            border-radius: 12px;
+            background-size: 100% auto;
+            transition: background-position 0.3s ease;
+        }
+        .btn-emerald-pulse:hover {
+            background-position: right center;
+            background-size: 200% auto;
+            animation: pulseEmerald 1.5s infinite;
+        }
+        @keyframes pulseEmerald {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .btn-blue-pulse {
+            border: none;
+            color: #fff;
+            background-image: linear-gradient(30deg, #1d4ed8, #3b82f6);
+            border-radius: 12px;
+            background-size: 100% auto;
+            transition: background-position 0.3s ease;
+        }
+        .btn-blue-pulse:hover {
+            background-position: right center;
+            background-size: 200% auto;
+            animation: pulseBlue 1.5s infinite;
+        }
+        @keyframes pulseBlue {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        .group\/edit:hover .pen-group {
+            animation: pen-scribble 0.6s ease-in-out infinite;
+        }
+        @keyframes pen-scribble {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(1px, -2px) rotate(-6deg); }
+            50% { transform: translate(-1px, -4px) rotate(-4deg); }
+            75% { transform: translate(1px, -6px) rotate(-6deg); }
+        }
     </style>
 </head>
 <body class="bg-slate-100 antialiased">
@@ -352,6 +401,12 @@
 
     {{-- ===== MODAL VER CLIENTE ===== --}}
     @include('partials.modals.modal-ver-cliente')
+
+    {{-- ===== MODAL VER MASCOTA ===== --}}
+    @include('partials.modals.modal-ver-mascota')
+
+    {{-- ===== MODAL EDITAR MASCOTA ===== --}}
+    @include('partials.modals.modal-editar-mascota')
 
     {{-- ===== LOADING SCREEN ===== --}}
     <x-loading-screen />

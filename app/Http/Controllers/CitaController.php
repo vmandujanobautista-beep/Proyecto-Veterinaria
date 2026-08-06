@@ -9,6 +9,9 @@ use App\Models\Mascota;
 use App\Services\WhatsappService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use App\Events\CitaCreada;
+use App\Events\CitaEditada;
+use App\Events\CitaEliminada;
 
 class CitaController extends Controller
 {
@@ -36,21 +39,25 @@ class CitaController extends Controller
 
         $citas = $query->paginate(10)->withQueryString();
 
-        // Conteos por estado para el panel de tarjetas
-        $conteoEstados = [
-            'pendiente'  => Cita::where('estado', 'pendiente')->count(),
-            'confirmada' => Cita::where('estado', 'confirmada')->count(),
-            'completada' => Cita::where('estado', 'completada')->count(),
-            'cancelada'  => Cita::where('estado', 'cancelada')->count(),
-        ];
+        // Un solo query agrupado en lugar de 4 queries separados
+        $conteoEstados = Cita::selectRaw('estado, count(*) as total')
+            ->groupBy('estado')
+            ->pluck('total', 'estado')
+            ->toArray();
+
+        // Asegurar que existan todas las claves aunque no haya registros de ese estado
+        $conteoEstados = array_merge(
+            ['pendiente' => 0, 'confirmada' => 0, 'completada' => 0, 'cancelada' => 0],
+            $conteoEstados
+        );
 
         return view('citas.index', compact('citas', 'conteoEstados'));
     }
 
     public function create(Request $request)
     {
-        $clientes = Cliente::orderBy('nombre')->get();
-        $mascotas = Mascota::with('cliente')->orderBy('nombre')->get();
+        $clientes = Cliente::select('id', 'nombre', 'apellido')->orderBy('nombre')->get();
+        $mascotas = Mascota::with('cliente:id,nombre,apellido')->select('id', 'nombre', 'especie', 'cliente_id')->orderBy('nombre')->get();
         return view('citas.create', compact('clientes', 'mascotas'));
     }
 
@@ -73,6 +80,8 @@ class CitaController extends Controller
         $data['enviado_whatsapp'] = $request->boolean('enviado_whatsapp');
 
         $cita = Cita::create($data);
+
+        event(new CitaCreada($cita));
 
         // Enviar email si se marcó la opción
         if ($data['enviado_email'] && $cita->cliente?->email) {
@@ -120,6 +129,8 @@ class CitaController extends Controller
 
         $cita->update($data);
 
+        event(new CitaEditada($cita));
+
         return redirect()->route('citas.index')
                          ->with('success', 'Cita actualizada correctamente.');
     }
@@ -127,6 +138,8 @@ class CitaController extends Controller
     public function destroy(Cita $cita)
     {
         $cita->delete();
+
+        event(new CitaEliminada($cita->id));
 
         return redirect()->route('citas.index')
                          ->with('success', 'Cita eliminada correctamente.');

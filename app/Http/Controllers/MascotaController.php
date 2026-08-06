@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Cliente;
 use App\Models\Mascota;
 use Illuminate\Http\Request;
-
+use App\Events\MascotaCreada;
+use App\Events\MascotaEditada;
+use App\Events\MascotaEliminada;
 class MascotaController extends Controller
 {
     public function index(Request $request)
@@ -30,7 +32,7 @@ class MascotaController extends Controller
 
     public function create(Request $request)
     {
-        $clientes = Cliente::orderBy('nombre')->get();
+        $clientes = Cliente::select('id', 'nombre', 'apellido', 'email')->orderBy('nombre')->get();
         return view('mascotas.create', compact('clientes'));
     }
 
@@ -47,7 +49,9 @@ class MascotaController extends Controller
             'cliente_id'      => ['required', 'exists:clientes,id'],
         ]);
 
-        Mascota::create($data);
+        $mascota = Mascota::create($data);
+
+        event(new MascotaCreada($mascota));
 
         return redirect()->route('mascotas.index')
                          ->with('success', 'Mascota registrada correctamente.');
@@ -56,13 +60,39 @@ class MascotaController extends Controller
     public function show(Mascota $mascota)
     {
         $mascota->load(['cliente', 'citas']);
-        return view('mascotas.show', compact('mascota'));
+
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'mascota' => [
+                    'id'               => $mascota->id,
+                    'nombre'           => $mascota->nombre,
+                    'especie'          => $mascota->especie,
+                    'raza'             => $mascota->raza,
+                    'sexo'             => $mascota->sexo,
+                    'color_pelaje'     => $mascota->color_pelaje,
+                    'fecha_nacimiento' => $mascota->fecha_nacimiento ? $mascota->fecha_nacimiento->format('Y-m-d') : null,
+                    'peso'             => $mascota->peso,
+                    'nota_medica'      => $mascota->nota_medica,
+                    'created_at'       => $mascota->created_at->format('d/m/Y'),
+                    'cliente'          => $mascota->cliente ? [
+                        'id'       => $mascota->cliente->id,
+                        'nombre'   => $mascota->cliente->nombre,
+                        'apellido' => $mascota->cliente->apellido,
+                        'telefono' => $mascota->cliente->telefono,
+                    ] : null,
+                ]
+            ]);
+        }
+
+        // Si la petición no es AJAX, redirigimos al index
+        return redirect()->route('mascotas.index');
     }
 
     public function edit(Mascota $mascota)
     {
         $mascota->load('citas');
-        $clientes = Cliente::orderBy('nombre')->get();
+        $clientes = Cliente::select('id', 'nombre', 'apellido', 'email')->orderBy('nombre')->get();
         return view('mascotas.edit', compact('mascota', 'clientes'));
     }
 
@@ -81,6 +111,15 @@ class MascotaController extends Controller
 
         $mascota->update($data);
 
+        event(new MascotaEditada($mascota));
+
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Mascota actualizada correctamente.'
+            ]);
+        }
+
         return redirect()->route('mascotas.index')
                          ->with('success', 'Mascota actualizada correctamente.');
     }
@@ -88,6 +127,8 @@ class MascotaController extends Controller
     public function destroy(Mascota $mascota)
     {
         $mascota->delete();
+
+        event(new MascotaEliminada($mascota->id));
 
         return redirect()->route('mascotas.index')
                          ->with('success', 'Mascota eliminada correctamente.');

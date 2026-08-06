@@ -8,7 +8,9 @@ use App\Rules\ValidStrictEmailRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-
+use App\Events\ClienteCreado;
+use App\Events\ClienteEditado;
+use App\Events\ClienteEliminado;
 class ClienteController extends Controller
 {
     // ══════════════════════════════════════════════════════════
@@ -102,6 +104,8 @@ class ClienteController extends Controller
             return $cliente;
         });
 
+        event(new ClienteCreado($cliente));
+
         if ($request->expectsJson() || $request->ajax()) {
             $cliente->load('mascotas');
             return response()->json([
@@ -128,7 +132,10 @@ class ClienteController extends Controller
 
     public function show(Cliente $cliente)
     {
-        $cliente->load(['mascotas', 'citas', 'ventas']);
+        // Cargar solo las relaciones y columnas que se usan en el modal
+        $cliente->load([
+            'mascotas:id,nombre,especie,raza,sexo,peso,fecha_nacimiento,color_pelaje,nota_medica,cliente_id',
+        ]);
         
         if (request()->expectsJson() || request()->ajax()) {
             return response()->json([
@@ -164,7 +171,8 @@ class ClienteController extends Controller
             ]);
         }
 
-        return view('clientes.show', compact('cliente'));
+        // Si la petición no es AJAX, redirigimos al index
+        return redirect()->route('clientes.index');
     }
 
     public function edit(Cliente $cliente)
@@ -246,6 +254,8 @@ class ClienteController extends Controller
             }
         }
 
+        event(new ClienteEditado($cliente));
+
         if (request()->expectsJson() || request()->ajax()) {
             return response()->json([
                 'success' => true,
@@ -265,6 +275,8 @@ class ClienteController extends Controller
         }
 
         $cliente->delete();
+
+        event(new ClienteEliminado($cliente->id));
 
         return redirect()->route('clientes.index')
                          ->with('success', 'Cliente eliminado correctamente.');

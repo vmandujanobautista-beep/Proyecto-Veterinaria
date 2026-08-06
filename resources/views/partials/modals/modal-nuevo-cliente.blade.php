@@ -15,7 +15,7 @@
     x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+    class="fixed inset-0 z-[80] flex items-center justify-center p-4"
     @keydown.escape.window="if(subModalOpen){ resetSubModal(); } else { clienteModalOpen = false; }"
     @nuevo-cliente.window="modo = 'crear'; clienteId = null; clienteModalOpen = true;"
     @editar-cliente.window="cargarCliente($event.detail.id)"
@@ -348,8 +348,7 @@
                     </div>
                     <button type="button"
                             @click="abrirSubModal()"
-                            class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95
-                                   text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-all shadow-sm hover:shadow-md">
+                            class="btn-emerald-pulse inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 shadow-sm active:scale-95">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -426,10 +425,7 @@
                     @click="guardarCliente()"
                     :disabled="sending || success"
                     :class="{'opacity-60 cursor-not-allowed': sending || success}"
-                    class="inline-flex items-center gap-2.5 px-6 py-2.5 text-sm font-semibold text-white rounded-xl transition-all"
-                    style="background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 4px 14px rgba(16,185,129,0.35);"
-                    x-on:mouseover="if(!sending && !success){this.style.background='linear-gradient(135deg,#34d399,#10b981)';}"
-                    x-on:mouseout="if(!sending && !success){this.style.background='linear-gradient(135deg,#10b981,#059669)';}">
+                    class="btn-emerald-pulse inline-flex items-center gap-2.5 px-6 py-2.5 text-sm font-semibold shadow-sm active:scale-95">
 
                 {{-- Estado normal --}}
                 <span x-show="!sending && !success" class="flex items-center gap-2 text-white">

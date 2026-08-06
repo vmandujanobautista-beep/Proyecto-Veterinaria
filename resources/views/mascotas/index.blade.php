@@ -5,14 +5,7 @@
                 <h2 class="text-xl font-bold text-slate-800">Mascotas</h2>
                 <p class="text-sm text-slate-500 mt-0.5">Gestión de pacientes de la clínica</p>
             </div>
-            <a href="{{ route('mascotas.create') }}"
-               id="btn-nueva-mascota"
-               class=" ml-4 mt-2 inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Nueva Mascota
-            </a>
+
         </div>
     </x-slot>
 
@@ -47,7 +40,7 @@
             </select>
 
             <button type="submit"
-                    class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl w-32 transition-colors">
+                    class="btn-blue-pulse px-5 py-2.5 text-sm font-medium w-32 shadow-sm active:scale-95">
                 Buscar
             </button>
             @if(request('buscar') || request('especie'))
@@ -95,45 +88,38 @@
                                 'Reptil' => '🦎',
                                 default  => '🐾',
                             };
-                            $colorGradient = match($mascota->especie) {
-                                'Perro'  => 'from-amber-400 to-orange-500',
-                                'Gato'   => 'from-purple-400 to-violet-600',
-                                'Ave'    => 'from-emerald-400 to-teal-600',
-                                'Conejo' => 'from-pink-400 to-rose-500',
-                                default  => 'from-sky-400 to-blue-600',
-                            };
                         @endphp
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 bg-gradient-to-br {{ $colorGradient }}">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 bg-blue-500">
                                         {{ $especieEmoji }}
                                     </div>
                                     <div>
                                         <p class="font-semibold text-slate-800">{{ $mascota->nombre }}</p>
-                                        <p class="text-xs text-slate-500 mt-0.5 md:hidden">{{ $mascota->especie }}</p>
+                                        <p class="text-xs text-slate-500 mt-0.5 md:hidden capitalize">{{ $mascota->especie }}</p>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 hidden md:table-cell">
-                                <p class="text-slate-700 font-medium">{{ $mascota->especie }}</p>
-                                <p class="text-xs text-slate-500 mt-0.5">{{ $mascota->raza ?? '—' }}</p>
+                                <p class="text-slate-700 font-medium capitalize">{{ $mascota->especie }}</p>
+                                <p class="text-xs text-slate-500 mt-0.5 capitalize">{{ $mascota->raza ?? '—' }}</p>
                             </td>
                             <td class="px-6 py-4 hidden lg:table-cell">
                                 @if($mascota->cliente)
-                                    <a href="{{ route('clientes.show', $mascota->cliente) }}"
-                                       class="text-sm text-sky-600 hover:underline font-medium">
+                                    <button type="button" @click="$dispatch('ver-cliente', { id: {{ $mascota->cliente->id }} })"
+                                       class="text-sm text-emerald-600 hover:underline font-medium text-left">
                                         {{ $mascota->cliente->nombre }} {{ $mascota->cliente->apellido }}
-                                    </a>
+                                    </button>
                                 @else
                                     <span class="text-slate-300">—</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-center hidden md:table-cell">
                                 @if($mascota->sexo)
-                                    <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full
-                                        {{ $mascota->sexo === 'Macho' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700' }}">
-                                        {{ $mascota->sexo === 'Macho' ? '♂' : '♀' }} {{ $mascota->sexo }}
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full text-white capitalize
+                                        {{ strtolower($mascota->sexo) === 'macho' ? 'bg-blue-500' : 'bg-pink-500' }}">
+                                        {{ strtolower($mascota->sexo) === 'macho' ? '♂' : '♀' }} {{ $mascota->sexo }}
                                     </span>
                                 @else
                                     <span class="text-slate-300 text-xs">—</span>
@@ -158,32 +144,56 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-center gap-2">
                                     <!-- Ver -->
-                                    <a href="{{ route('mascotas.show', $mascota) }}"
+                                    <button type="button" @click="$dispatch('ver-mascota', { id: {{ $mascota->id }} })"
                                        title="Ver detalle"
-                                       class="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                       class="group/btn p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <!-- Pupil -->
+                                            <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"
+                                                class="transition-transform duration-150 ease-out origin-center group-hover/btn:scale-75" />
+                                            <!-- Eye shape -->
+                                            <path
+                                                d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"
+                                                class="transition-transform duration-150 ease-out origin-center group-hover/btn:scale-y-90" />
                                         </svg>
-                                    </a>
+                                    </button>
                                     <!-- Editar -->
-                                    <a href="{{ route('mascotas.edit', $mascota) }}"
-                                       title="Editar"
-                                       class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    <button type="button" @click="$dispatch('editar-mascota', { id: {{ $mascota->id }} })"
+                                        title="Editar"
+                                        class="group/edit p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors relative overflow-visible">
+                                        <svg class="w-4 h-4 overflow-visible" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="square" stroke-miterlimit="10">
+                                            <g class="pen-group" style="transform-origin: 50% 50%;">
+                                                <path
+                                                    class="pen-slash opacity-0 transition-opacity duration-300 group-hover/edit:opacity-100"
+                                                    d="M20 6 L26 12" />
+                                                <path class="pen-body"
+                                                    d="m10.5,27.5l-8,2 2-8L22.257,3.743c1.657-1.657,4.343-1.657,6,0s1.657,4.343,0,6L10.5,27.5Z" />
+                                            </g>
                                         </svg>
-                                    </a>
+                                    </button>
                                     <!-- Eliminar -->
                                     <form method="POST" action="{{ route('mascotas.destroy', $mascota) }}"
                                           onsubmit="return confirm('¿Eliminar a {{ $mascota->nombre }}? Esta acción no se puede deshacer.')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit"
-                                                title="Eliminar"
-                                                class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        <button type="submit" title="Eliminar"
+                                            class="group/del p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                <path d="M4 7l16 0"
+                                                    class="transition-transform duration-200 ease-out origin-bottom group-hover/del:-rotate-[25deg] group-hover/del:-translate-y-1" />
+                                                <path d="M10 11l0 6" />
+                                                <path d="M14 11l0 6" />
+                                                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"
+                                                    class="transition-transform duration-200 ease-out origin-bottom group-hover/del:-rotate-[35deg] group-hover/del:-translate-y-1.5 group-hover/del:-translate-x-0.5" />
                                             </svg>
                                         </button>
                                     </form>
@@ -201,15 +211,7 @@
                                     <p class="text-sm text-slate-400 mb-5">
                                         {{ request('buscar') || request('especie') ? 'Intenta con otra búsqueda o filtro.' : 'Comienza registrando la primera mascota.' }}
                                     </p>
-                                    @if(!request('buscar') && !request('especie'))
-                                        <a href="{{ route('mascotas.create') }}"
-                                           class="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                            </svg>
-                                            Registrar Primera Mascota
-                                        </a>
-                                    @endif
+
                                 </div>
                             </td>
                         </tr>
@@ -220,8 +222,8 @@
 
         <!-- Pagination -->
         @if($mascotas->hasPages())
-            <div class="px-6 py-4 border-t border-slate-100">
-                {{ $mascotas->links() }}
+            <div class="px-6 py-8 border-t border-slate-100 flex justify-center">
+                {{ $mascotas->links('vendor.pagination.uiverse-navy') }}
             </div>
         @endif
     </div>

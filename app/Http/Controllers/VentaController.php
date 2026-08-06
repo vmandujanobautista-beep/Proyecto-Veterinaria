@@ -9,6 +9,8 @@ use App\Models\Venta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Events\VentaCreada;
+use App\Events\VentaEliminada;
 
 class VentaController extends Controller
 {
@@ -121,6 +123,8 @@ class VentaController extends Controller
 
             DB::commit();
 
+            event(new VentaCreada($venta));
+
             return redirect()->route('ventas.show', $venta)
                              ->with('success', 'Venta registrada correctamente.');
 
@@ -158,6 +162,8 @@ class VentaController extends Controller
     public function destroy(Venta $venta)
     {
         $venta->delete();
+
+        event(new VentaEliminada($venta->id));
 
         return redirect()->route('ventas.index')
                          ->with('success', 'Venta eliminada correctamente.');

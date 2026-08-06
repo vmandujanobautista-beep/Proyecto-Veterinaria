@@ -12,7 +12,7 @@
     x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+    class="fixed inset-0 z-[70] flex items-center justify-center p-4"
     @keydown.escape.window="verModalOpen = false"
     @ver-cliente.window="cargarCliente($event.detail.id)"
 >
@@ -46,8 +46,13 @@
             </h2>
             <div class="flex gap-2">
                 <button type="button" @click="$dispatch('editar-cliente', { id: cliente.id }); verModalOpen = false"
-                        class="px-3 py-1.5 text-sm font-semibold text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        class="group/edit px-3 py-1.5 text-sm font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors flex items-center gap-1.5 overflow-visible">
+                    <svg class="w-4 h-4 overflow-visible" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-miterlimit="10">
+                        <g class="pen-group" style="transform-origin: 50% 50%;">
+                            <path class="pen-slash opacity-0 transition-opacity duration-300 group-hover/edit:opacity-100" d="M20 6 L26 12" />
+                            <path class="pen-body" d="m10.5,27.5l-8,2 2-8L22.257,3.743c1.657-1.657,4.343-1.657,6,0s1.657,4.343,0,6L10.5,27.5Z" />
+                        </g>
+                    </svg>
                     Editar
                 </button>
                 <button type="button" @click="verModalOpen = false"
@@ -131,11 +136,16 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <h5 class="font-bold text-slate-800 text-base truncate" x-text="mascota.nombre"></h5>
-                                <p class="text-xs text-slate-500 capitalize mb-2">
+                                <div class="flex items-center gap-1.5 text-xs text-slate-500 capitalize mb-2">
                                     <span x-text="mascota.especie"></span>
                                     <template x-if="mascota.raza"><span x-text="' • ' + mascota.raza"></span></template>
-                                    <template x-if="mascota.sexo"><span x-text="' • ' + mascota.sexo"></span></template>
-                                </p>
+                                    <template x-if="mascota.sexo">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white ml-1 font-semibold"
+                                              :class="mascota.sexo.toLowerCase() === 'macho' ? 'bg-blue-500' : 'bg-pink-500'"
+                                              x-text="(mascota.sexo.toLowerCase() === 'macho' ? '♂ ' : '♀ ') + mascota.sexo">
+                                        </span>
+                                    </template>
+                                </div>
                                 
                                 <div class="grid grid-cols-2 gap-1 text-[11px] bg-slate-50 p-2 rounded-lg">
                                     <div class="truncate"><span class="text-slate-400">Peso:</span> <span class="font-medium text-slate-700" x-text="mascota.peso ? mascota.peso + ' kg' : '—'"></span></div>

@@ -112,6 +112,25 @@
             50% { transform: translate(-1px, -4px) rotate(-4deg); }
             75% { transform: translate(1px, -6px) rotate(-6deg); }
         }
+        
+        .btn-gold-pulse {
+            border: none;
+            color: #fff;
+            background-image: linear-gradient(30deg, #d97706, #fbbf24);
+            border-radius: 12px;
+            background-size: 100% auto;
+            transition: background-position 0.3s ease;
+        }
+        .btn-gold-pulse:hover {
+            background-position: right center;
+            background-size: 200% auto;
+            animation: pulseGold 1.5s infinite;
+        }
+        @keyframes pulseGold {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
     </style>
 </head>
 <body class="bg-slate-100 antialiased">
@@ -407,6 +426,17 @@
 
     {{-- ===== MODAL EDITAR MASCOTA ===== --}}
     @include('partials.modals.modal-editar-mascota')
+
+    {{-- ===== MODAL VER PRODUCTO ===== --}}
+    @include('partials.modals.modal-ver-producto')
+
+    {{-- ===== MODAL SOLICITAR REABASTECIMIENTO ===== --}}
+    @include('partials.modals.modal-solicitar-reabastecimiento')
+
+    {{-- ===== MODALS DE CITAS ===== --}}
+    @include('partials.modals.modal-agendar-cita')
+    @include('partials.modals.modal-ver-cita')
+    @include('partials.modals.modal-cancelar-cita')
 
     {{-- ===== LOADING SCREEN ===== --}}
     <x-loading-screen />

@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SolicitudReabastecimiento;
 use App\Models\Producto;
+use App\Models\User;
+use App\Notifications\SolicitudReabastecimientoNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 class ProductoController extends Controller
 {
@@ -15,6 +20,7 @@ class ProductoController extends Controller
             $query->where(function ($q) use ($buscar) {
                 $q->where('nombre',      'like', "%{$buscar}%")
                   ->orWhere('codigo',     'like', "%{$buscar}%")
+                  ->orWhere('categoria',  'like', "%{$buscar}%")
                   ->orWhere('descripcion','like', "%{$buscar}%");
             });
         }
@@ -22,6 +28,8 @@ class ProductoController extends Controller
         if ($categoria = $request->input('categoria')) {
             $query->where('categoria', $categoria);
         }
+
+        // El filtro de stock fue removido a petición del usuario.
 
         $productos = $query->paginate(10)->withQueryString();
 
@@ -58,6 +66,23 @@ class ProductoController extends Controller
 
     public function show(Producto $producto)
     {
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success'  => true,
+                'producto' => [
+                    'id'          => $producto->id,
+                    'nombre'      => $producto->nombre,
+                    'codigo'      => $producto->codigo,
+                    'categoria'   => $producto->categoria,
+                    'precio'      => $producto->precio,
+                    'stock'       => $producto->stock,
+                    'descripcion' => $producto->descripcion,
+                    'created_at'  => $producto->created_at?->format('d/m/Y'),
+                    'updated_at'  => $producto->updated_at?->format('d/m/Y H:i'),
+                ],
+            ]);
+        }
+
         return view('productos.show', compact('producto'));
     }
 
@@ -89,5 +114,44 @@ class ProductoController extends Controller
 
         return redirect()->route('productos.index')
                          ->with('success', 'Producto eliminado del inventario.');
+    }
+
+    /**
+     * Envía una solicitud de reabastecimiento por email a todos los admins.
+     */
+    public function solicitarReabastecimiento(Producto $producto)
+    {
+        // Solo permitir si el stock es bajo (< 10)
+        if ($producto->stock >= 10) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este producto no requiere reabastecimiento.',
+            ], 422);
+        }
+
+        // Buscar todos los admins
+        $admins = User::where('role', 'admin')->get();
+
+        if ($admins->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No hay administradores configurados para recibir notificaciones.',
+            ], 422);
+        }
+
+        $solicitante = auth()->user();
+
+        // Enviar notificación (Mail + Database) a todos los admins
+        Notification::send($admins, new SolicitudReabastecimientoNotification($producto, $solicitante));
+
+        $urgencia = $producto->stock === 0
+            ? 'urgente (producto agotado)'
+            : ($producto->stock <= 4 ? 'urgente' : '');
+
+        return response()->json([
+            'success' => true,
+            'message' => "Solicitud {$urgencia} enviada a " . $admins->count() . " administrador(es) correctamente.",
+            'admins'  => $admins->count(),
+        ]);
     }
 }

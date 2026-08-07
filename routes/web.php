@@ -34,11 +34,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('mascotas', MascotaController::class);
     Route::resource('citas', CitaController::class);
+    Route::post('/productos/{producto}/solicitar-reabastecimiento', [ProductoController::class, 'solicitarReabastecimiento'])
+         ->name('productos.solicitar-reabastecimiento');
     Route::resource('productos', ProductoController::class);
     Route::resource('ventas', VentaController::class);
 
-    Route::post('/citas/{cita}/confirmar', [CitaController::class, 'confirmar'])->name('citas.confirmar');
-    Route::post('/citas/{cita}/confirmar-whatsapp', [CitaController::class, 'confirmarWhatsapp'])->name('citas.confirmar-whatsapp');
+    Route::post('/citas/{cita}/confirmar',        [CitaController::class, 'confirmar'])->name('citas.confirmar');
+    Route::post('/citas/{cita}/confirmar-whatsapp',[CitaController::class, 'confirmarWhatsapp'])->name('citas.confirmar-whatsapp');
+    Route::post('/citas/{cita}/cancelar',          [CitaController::class, 'cancelar'])->name('citas.cancelar');
+    Route::post('/citas/{cita}/completar',         [CitaController::class, 'completar'])->name('citas.completar');
+    Route::post('/citas/{cita}/enviar-email',      [CitaController::class, 'enviarEmail'])->name('citas.enviar-email');
+    Route::post('/citas/{cita}/enviar-whatsapp',   [CitaController::class, 'enviarWhatsapp'])->name('citas.enviar-whatsapp');
+    Route::get('/api/clientes/{cliente}/mascotas', [CitaController::class, 'mascotasPorCliente'])->name('api.clientes.mascotas');
+    Route::get('/api/clientes',                    [CitaController::class, 'listarClientes'])->name('api.clientes.listar');
 });
 
 Route::middleware('auth')->group(function () {

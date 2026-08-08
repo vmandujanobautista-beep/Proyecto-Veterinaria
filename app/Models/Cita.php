@@ -2,15 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Cita extends Model
 {
+    use HasFactory;
+    public const SERVICIOS_PRECIOS = [
+        'Consulta General' => 500,
+        'Vacunación' => 350,
+        'Desparasitación' => 200,
+        'Baño y Corte' => 450,
+        'Esterilización/Castración' => 1200,
+        'Cirugía' => 3000,
+        'Laboratorio' => 800,
+        'Rayos X / Ultrasonido' => 950,
+        'Chequeo General' => 600,
+        'Urgencias' => 1500,
+    ];
+
     protected $fillable = [
         'fecha',
         'hora',
         'tipo_servicio',
+        'precio',
         'motivo',
         'estado',
         'enviado_email',

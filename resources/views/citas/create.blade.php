@@ -169,15 +169,12 @@
                                        focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
                                        {{ $errors->has('tipo_servicio') ? 'border-rose-400 bg-rose-50' : 'border-slate-200 bg-slate-50 hover:border-slate-300' }}">
                             <option value="">— Selecciona servicio —</option>
-                            <option value="Consulta general"    {{ old('tipo_servicio') === 'Consulta general'    ? 'selected' : '' }}>🩺 Consulta general</option>
-                            <option value="Vacunación"          {{ old('tipo_servicio') === 'Vacunación'          ? 'selected' : '' }}>💉 Vacunación</option>
-                            <option value="Desparasitación"     {{ old('tipo_servicio') === 'Desparasitación'     ? 'selected' : '' }}>🦠 Desparasitación</option>
-                            <option value="Cirugía"             {{ old('tipo_servicio') === 'Cirugía'             ? 'selected' : '' }}>🔬 Cirugía</option>
-                            <option value="Baño y estética"     {{ old('tipo_servicio') === 'Baño y estética'     ? 'selected' : '' }}>🛁 Baño y estética</option>
-                            <option value="Urgencia"            {{ old('tipo_servicio') === 'Urgencia'            ? 'selected' : '' }}>🚨 Urgencia</option>
-                            <option value="Revisión"            {{ old('tipo_servicio') === 'Revisión'            ? 'selected' : '' }}>📋 Revisión</option>
-                            <option value="Laboratorio"         {{ old('tipo_servicio') === 'Laboratorio'         ? 'selected' : '' }}>🧪 Laboratorio</option>
-                            <option value="Otro"                {{ old('tipo_servicio') === 'Otro'                ? 'selected' : '' }}>Otro</option>
+                            @foreach(\App\Models\Cita::SERVICIOS_PRECIOS as $servicio => $precio)
+                                <option value="{{ $servicio }}"
+                                    {{ old('tipo_servicio') === $servicio ? 'selected' : '' }}>
+                                    {{ $servicio }} - ${{ number_format($precio, 2) }}
+                                </option>
+                            @endforeach
                         </select>
                         @error('tipo_servicio')
                             <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1">

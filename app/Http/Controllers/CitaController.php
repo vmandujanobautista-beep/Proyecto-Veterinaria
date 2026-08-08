@@ -97,6 +97,7 @@ class CitaController extends Controller
         $data['estado']           = $data['estado']           ?? 'pendiente';
         $data['enviado_email']    = $request->boolean('enviado_email');
         $data['enviado_whatsapp'] = $request->boolean('enviado_whatsapp');
+        $data['precio']           = Cita::SERVICIOS_PRECIOS[$data['tipo_servicio']] ?? 0;
 
         $cita = Cita::create($data);
 
@@ -158,6 +159,7 @@ class CitaController extends Controller
 
         $data['enviado_email']    = $request->boolean('enviado_email');
         $data['enviado_whatsapp'] = $request->boolean('enviado_whatsapp');
+        $data['precio']           = Cita::SERVICIOS_PRECIOS[$data['tipo_servicio']] ?? 0;
 
         $cita->update($data);
 

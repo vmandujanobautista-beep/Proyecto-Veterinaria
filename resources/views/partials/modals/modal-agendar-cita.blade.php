@@ -148,16 +148,24 @@
                                focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
                                hover:border-slate-300 appearance-none transition-all">
                     <option value="">— Selecciona un servicio —</option>
-                    <option value="Consulta General">🩺 Consulta General</option>
-                    <option value="Vacunación">💉 Vacunación</option>
-                    <option value="Desparasitación">🦠 Desparasitación</option>
-                    <option value="Baño y Corte">🛁 Baño y Corte</option>
-                    <option value="Esterilización/Castración">✂️ Esterilización / Castración</option>
-                    <option value="Cirugía">🔬 Cirugía</option>
-                    <option value="Laboratorio">🧪 Laboratorio (análisis)</option>
-                    <option value="Rayos X / Ultrasonido">📡 Rayos X / Ultrasonido</option>
-                    <option value="Chequeo General">📋 Chequeo General</option>
-                    <option value="Urgencias">🚨 Urgencias</option>
+                    @foreach(\App\Models\Cita::SERVICIOS_PRECIOS as $servicio => $precio)
+                        @php
+                            $icono = match($servicio) {
+                                'Consulta General' => '🩺',
+                                'Vacunación' => '💉',
+                                'Desparasitación' => '🦠',
+                                'Baño y Corte' => '🛁',
+                                'Esterilización/Castración' => '✂️',
+                                'Cirugía' => '🔬',
+                                'Laboratorio' => '🧪',
+                                'Rayos X / Ultrasonido' => '📡',
+                                'Chequeo General' => '📋',
+                                'Urgencias' => '🚨',
+                                default => '🩺'
+                            };
+                        @endphp
+                        <option value="{{ $servicio }}">{{ $icono }} {{ $servicio }} - ${{ number_format($precio, 2) }}</option>
+                    @endforeach
                 </select>
             </div>
 

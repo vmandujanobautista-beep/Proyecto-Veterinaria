@@ -46,8 +46,8 @@
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-5">
         <form method="GET" action="{{ route('citas.index') }}" class="flex flex-col gap-3">
 
-            {{-- Fila 1: buscador + estado --}}
-            <div class="flex flex-col sm:flex-row gap-3">
+            {{-- Fila 1: buscador + rango personalizado --}}
+            <div class="flex flex-col lg:flex-row gap-3">
                 {{-- Buscador --}}
                 <div class="relative flex-1">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
@@ -65,61 +65,46 @@
                                   bg-slate-50 transition-all">
                 </div>
 
-                {{-- Filtro estado --}}
-                <select id="filtro-estado"
-                        name="estado"
-                        class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none
-                               focus:ring-2 focus:ring-violet-500 bg-slate-50 text-slate-700
-                               w-full sm:w-52 transition-all appearance-none">
-                    <option value="">Todos los estados</option>
-                    <option value="pendiente"  {{ request('estado') === 'pendiente'  ? 'selected' : '' }}>⏳ Pendiente</option>
-                    <option value="confirmada" {{ request('estado') === 'confirmada' ? 'selected' : '' }}>✅ Confirmada</option>
-                    <option value="completada" {{ request('estado') === 'completada' ? 'selected' : '' }}>🏁 Completada</option>
-                    <option value="cancelada"  {{ request('estado') === 'cancelada'  ? 'selected' : '' }}>❌ Cancelada</option>
-                </select>
-            </div>
-
-            {{-- Fila 2: filtros de fecha + botones --}}
-            <div class="flex flex-col sm:flex-row gap-3 items-center">
-                {{-- Accesos rápidos de fecha --}}
-                <div class="flex gap-2 flex-wrap">
-                    @foreach([['hoy','Hoy'],['semana','Esta semana'],['mes','Este mes']] as [$val,$lbl])
-                        <a href="{{ route('citas.index', array_merge(request()->except('fecha_filtro','fecha_desde','fecha_hasta','page'), ['fecha_filtro' => request('fecha_filtro') === $val ? '' : $val])) }}"
-                           class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors
-                                  {{ request('fecha_filtro') === $val
-                                      ? 'bg-violet-600 text-white border-violet-600'
-                                      : 'border-slate-200 text-slate-600 hover:bg-slate-50' }}">
-                            {{ $lbl }}
-                        </a>
-                    @endforeach
-                </div>
-
                 {{-- Rango personalizado --}}
-                <div class="flex items-center gap-2 ml-auto">
+                <div class="flex flex-wrap items-center gap-2">
                     <input type="date"
                            id="filtro-fecha-desde"
                            name="fecha_desde"
                            value="{{ request('fecha_desde') }}"
-                           class="px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none
+                           class="px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none
                                   focus:ring-2 focus:ring-violet-500 bg-slate-50 text-slate-700 transition-all">
-                    <span class="text-slate-400 text-xs">—</span>
+                    <span class="text-slate-400 text-sm">—</span>
                     <input type="date"
                            id="filtro-fecha-hasta"
                            name="fecha_hasta"
                            value="{{ request('fecha_hasta') }}"
-                           class="px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none
+                           class="px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none
                                   focus:ring-2 focus:ring-violet-500 bg-slate-50 text-slate-700 transition-all">
                     <button type="submit"
-                            class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium rounded-xl transition-colors">
+                            class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition-colors">
                         Filtrar
                     </button>
                     @if(request()->hasAny(['buscar','estado','fecha_filtro','fecha_desde','fecha_hasta']))
                         <a href="{{ route('citas.index') }}"
-                           class="px-3 py-2 border border-slate-200 text-slate-600 text-xs font-medium rounded-xl hover:bg-slate-50 transition-colors">
+                           class="px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors">
                             Limpiar
                         </a>
                     @endif
                 </div>
+            </div>
+
+            {{-- Fila 2: Accesos rápidos de fecha --}}
+            <div class="flex gap-2 flex-wrap items-center">
+                <span class="text-xs text-slate-500 font-medium mr-1">Filtros rápidos:</span>
+                @foreach([['hoy','Hoy'],['semana','Esta semana'],['mes','Este mes']] as [$val,$lbl])
+                    <a href="{{ route('citas.index', array_merge(request()->except('fecha_filtro','fecha_desde','fecha_hasta','page'), ['fecha_filtro' => request('fecha_filtro') === $val ? '' : $val])) }}"
+                       class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors
+                              {{ request('fecha_filtro') === $val
+                                  ? 'bg-violet-600 text-white border-violet-600'
+                                  : 'border-slate-200 text-slate-600 hover:bg-slate-50' }}">
+                        {{ $lbl }}
+                    </a>
+                @endforeach
             </div>
         </form>
     </div>
@@ -148,6 +133,7 @@
                         <th class="text-left px-5 py-3.5 font-semibold">Fecha</th>
                         <th class="text-left px-5 py-3.5 font-semibold hidden sm:table-cell">Hora</th>
                         <th class="text-left px-5 py-3.5 font-semibold hidden lg:table-cell">Servicio</th>
+                        <th class="text-left px-5 py-3.5 font-semibold">Precio</th>
                         <th class="text-center px-5 py-3.5 font-semibold">Estado</th>
                         <th class="text-center px-5 py-3.5 font-semibold hidden md:table-cell">Notif.</th>
                         <th class="text-center px-5 py-3.5 font-semibold">Acciones</th>
@@ -238,6 +224,13 @@
                                         {{ $cita->motivo }}
                                     </p>
                                 @endif
+                            </td>
+
+                            {{-- Precio --}}
+                            <td class="px-5 py-3.5">
+                                <span class="text-sm font-semibold text-emerald-600">
+                                    {{ $cita->precio ? '$' . number_format($cita->precio, 2) : '—' }}
+                                </span>
                             </td>
 
                             {{-- Estado --}}

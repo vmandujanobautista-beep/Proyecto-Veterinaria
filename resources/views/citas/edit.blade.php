@@ -211,10 +211,10 @@
                                        focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent
                                        {{ $errors->has('tipo_servicio') ? 'border-rose-400 bg-rose-50' : 'border-slate-200 bg-slate-50 hover:border-slate-300' }}">
                             <option value="">— Selecciona servicio —</option>
-                            @foreach(['Consulta general','Vacunación','Desparasitación','Cirugía','Baño y estética','Urgencia','Revisión','Laboratorio','Otro'] as $servicio)
+                            @foreach(\App\Models\Cita::SERVICIOS_PRECIOS as $servicio => $precio)
                                 <option value="{{ $servicio }}"
                                     {{ old('tipo_servicio', $cita->tipo_servicio) === $servicio ? 'selected' : '' }}>
-                                    {{ $servicio }}
+                                    {{ $servicio }} - ${{ number_format($precio, 2) }}
                                 </option>
                             @endforeach
                         </select>

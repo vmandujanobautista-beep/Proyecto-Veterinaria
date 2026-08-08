@@ -34,15 +34,14 @@
         style="max-width:700px; max-height:92vh;"
         @click.stop
     >
-        {{-- Barra decorativa top con color del estado --}}
-        <div class="h-1.5 w-full rounded-t-2xl" :style="'background:' + estadoGradient"></div>
+        {{-- Barra decorativa top morada --}}
+        <div class="h-1.5 w-full rounded-t-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600"></div>
 
         {{-- Header --}}
         <div class="flex items-center justify-between px-7 py-4 border-b border-slate-100">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                     :style="'background:' + estadoColor + '20'">
-                    <svg class="w-6 h-6" :style="'color:' + estadoColor" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-violet-100 text-violet-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
@@ -80,10 +79,10 @@
                     <span x-text="estadoLabel"></span>
                 </span>
                 <div class="flex items-center gap-2 text-sm text-slate-500">
-                    <span :class="cita?.enviado_email ? 'text-emerald-600' : 'text-slate-300'"
+                    <span :class="cita?.enviado_email ? 'text-emerald-400' : 'text-slate-300'"
                           :title="cita?.enviado_email ? 'Email enviado' : 'Email no enviado'"
                           class="text-lg cursor-default">📧</span>
-                    <span :class="cita?.enviado_whatsapp ? 'text-emerald-600' : 'text-slate-300'"
+                    <span :class="cita?.enviado_whatsapp ? 'text-emerald-400' : 'text-slate-300'"
                           :title="cita?.enviado_whatsapp ? 'WhatsApp enviado' : 'WhatsApp no enviado'"
                           class="text-lg cursor-default">📱</span>
                 </div>
@@ -154,31 +153,6 @@
                 <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Acciones</p>
                 <div class="flex flex-wrap gap-2">
 
-                    {{-- Confirmar --}}
-                    <template x-if="cita && cita.estado === 'pendiente'">
-                        <form :action="`/citas/${cita.id}/confirmar`" method="POST">
-                            @csrf
-                            <button type="submit"
-                                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 bg-sky-100 text-sky-700 hover:bg-sky-200 rounded-lg transition-colors">
-                                ✓ Confirmar
-                            </button>
-                        </form>
-                    </template>
-
-                    {{-- Cancelar --}}
-                    <template x-if="cita && cita.estado !== 'cancelada' && cita.estado !== 'completada'">
-                        <button type="button"
-                                @click="cerrar(); $dispatch('cancelar-cita', { id: cita.id })"
-                                class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg transition-colors group relative">
-                            <svg class="w-3.5 h-3.5 overflow-visible" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M18 6l-12 12" class="origin-center transition-transform duration-200 ease-out group-hover:rotate-[15deg] group-hover:scale-110" />
-                                <path d="M6 6l12 12" class="origin-center transition-transform duration-200 ease-out group-hover:-rotate-[15deg] group-hover:scale-110" />
-                            </svg>
-                            Cancelar
-                        </button>
-                    </template>
-
                     {{-- Completar --}}
                     <template x-if="cita && (cita.estado === 'confirmada' || cita.estado === 'pendiente')">
                         <form :action="`/citas/${cita.id}/completar`" method="POST">
@@ -191,7 +165,7 @@
                     </template>
 
                     {{-- Enviar Email --}}
-                    <template x-if="cita && !cita.enviado_email">
+                    <template x-if="cita && !cita.enviado_email && cliente?.email">
                         <form :action="`/citas/${cita.id}/enviar-email`" method="POST">
                             @csrf
                             <button type="submit"
@@ -202,7 +176,7 @@
                     </template>
 
                     {{-- Enviar WhatsApp --}}
-                    <template x-if="cita && !cita.enviado_whatsapp">
+                    <template x-if="cita && !cita.enviado_whatsapp && cliente?.telefono">
                         <form :action="`/citas/${cita.id}/enviar-whatsapp`" method="POST">
                             @csrf
                             <button type="submit"
@@ -213,6 +187,8 @@
                     </template>
                 </div>
             </div>
+
+
         </div>
     </div>
 </div>

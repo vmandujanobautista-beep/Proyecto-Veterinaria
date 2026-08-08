@@ -1,4 +1,22 @@
 <x-app-layout>
+    <style>
+        .btn-fuego-animated {
+            border: none; color: #fff;
+            background-image: linear-gradient(30deg, #dc2626, #f97316);
+            border-radius: 0.75rem; background-size: 100% auto;
+            font-family: inherit; transition: all 0.3s ease;
+        }
+        .btn-fuego-animated:hover {
+            background-position: right center; background-size: 200% auto;
+            animation: pulseFuego 1.5s infinite;
+        }
+        @keyframes pulseFuego {
+            0%   { box-shadow: 0 0 0 0 rgba(220,38,38,.6); }
+            70%  { box-shadow: 0 0 0 10px rgba(220,38,38,0); }
+            100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+        }
+    </style>
+
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
@@ -7,7 +25,7 @@
             </div>
             <a href="{{ route('ventas.create') }}"
                id="btn-nueva-venta"
-               class="ml-4 mt-2 inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
+               class="btn-fuego-animated ml-4 mt-2 inline-flex items-center gap-2 text-white text-sm font-semibold px-4 py-2.5 shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -16,7 +34,184 @@
         </div>
     </x-slot>
 
-    <!-- Summary Cards -->
+    {{-- ═══ MODALS ═══ --}}
+
+    {{-- Modal VER DETALLE --}}
+    <div x-data="verVentaModal()"
+         x-cloak
+         x-show="open"
+         x-transition:enter="transition ease-out duration-250"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[80] flex items-center justify-center p-4"
+         @keydown.escape.window="cerrar()"
+         @ver-venta.window="abrir($event.detail.id)">
+
+        <div class="absolute inset-0 bg-black/60" style="backdrop-filter:blur(4px);" @click="cerrar()"></div>
+
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 scale-95"
+             class="relative w-full bg-white rounded-2xl shadow-2xl overflow-y-auto"
+             style="max-width:640px; max-height:92vh;"
+             @click.stop>
+
+            <div class="h-1.5 w-full rounded-t-2xl bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                        <span class="text-lg">🧾</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800" x-text="venta ? 'Venta ' + venta.folio : 'Cargando...'"></h3>
+                        <p class="text-xs text-slate-400" x-text="venta ? venta.created_at_formatted : ''"></p>
+                    </div>
+                </div>
+                <button @click="cerrar()" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Loader --}}
+            <div x-show="cargando" class="p-12 flex flex-col items-center gap-3">
+                <svg class="w-8 h-8 text-emerald-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+            </div>
+
+            {{-- Content --}}
+            <div x-show="!cargando && venta" class="p-6 space-y-5">
+
+                {{-- Cliente + Mascota + Cajero --}}
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Cliente</p>
+                        <p class="text-sm font-bold text-slate-800" x-text="venta?.cliente_nombre || '—'"></p>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Mascota</p>
+                        <p class="text-sm font-bold text-slate-800" x-text="venta?.mascota_nombre || '—'"></p>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Cajero</p>
+                        <p class="text-sm font-bold text-slate-800" x-text="venta?.cajero || '—'"></p>
+                    </div>
+                </div>
+
+                {{-- Método de pago + Estado --}}
+                <div class="flex gap-3">
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 flex-1">
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Método de Pago</p>
+                        <p class="text-sm font-bold text-slate-800" x-text="venta?.metodo_pago || '—'"></p>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 flex-1">
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Estado</p>
+                        <span class="inline-block text-xs font-semibold px-2.5 py-1 rounded-full"
+                              :class="venta?.estado === 'completada' ? 'bg-emerald-100 text-emerald-700' :
+                                      venta?.estado === 'cancelada'  ? 'bg-rose-100 text-rose-700' :
+                                      'bg-amber-100 text-amber-700'"
+                              x-text="venta?.estado ? venta.estado.charAt(0).toUpperCase() + venta.estado.slice(1) : '—'"></span>
+                    </div>
+                </div>
+
+                {{-- Productos --}}
+                <div>
+                    <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-2">Productos</p>
+                    <div class="border border-slate-100 rounded-xl overflow-hidden">
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-50 text-xs text-slate-500 uppercase">
+                                <tr>
+                                    <th class="text-left px-4 py-2.5 font-semibold">Producto</th>
+                                    <th class="text-center px-3 py-2.5 font-semibold">Cant.</th>
+                                    <th class="text-right px-3 py-2.5 font-semibold">Precio</th>
+                                    <th class="text-right px-4 py-2.5 font-semibold">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                <template x-for="p in venta?.productos" :key="p.nombre">
+                                    <tr>
+                                        <td class="px-4 py-2.5 font-medium text-slate-800" x-text="p.nombre"></td>
+                                        <td class="px-3 py-2.5 text-center text-slate-600" x-text="p.cantidad"></td>
+                                        <td class="px-3 py-2.5 text-right text-slate-600" x-text="'$' + fmt(p.precio_unitario)"></td>
+                                        <td class="px-4 py-2.5 text-right font-semibold text-slate-800" x-text="'$' + fmt(p.subtotal)"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                            <tfoot class="bg-emerald-50 border-t border-emerald-100">
+                                <tr>
+                                    <td colspan="3" class="px-4 py-3 text-sm font-bold text-emerald-800">TOTAL</td>
+                                    <td class="px-4 py-3 text-right text-lg font-black text-emerald-700"
+                                        x-text="'$' + fmt(venta?.total)"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal CANCELAR VENTA --}}
+    <div x-data="cancelarVentaModal()"
+         x-cloak
+         x-show="open"
+         x-transition:enter="transition ease-out duration-250"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[90] flex items-center justify-center p-4"
+         @keydown.escape.window="cerrar()"
+         @cancelar-venta.window="abrir($event.detail.id, $event.detail.folio)">
+
+        <div class="absolute inset-0 bg-black/60" style="backdrop-filter:blur(4px);" @click="cerrar()"></div>
+
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6"
+             @click.stop>
+
+            <div class="text-center mb-5">
+                <div class="w-16 h-16 bg-rose-100 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-3">⚠️</div>
+                <h3 class="text-lg font-bold text-slate-800">¿Cancelar esta venta?</h3>
+                <p class="text-sm text-slate-500 mt-1">Venta <strong x-text="folio"></strong></p>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5 text-sm text-amber-700">
+                📦 El stock de todos los productos incluidos en esta venta será <strong>restaurado automáticamente</strong>.
+            </div>
+
+            <div class="flex gap-3">
+                <button @click="cerrar()"
+                        class="flex-1 px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors">
+                    No cancelar
+                </button>
+                <form :action="`/ventas/${ventaId}/cancelar`" method="POST" class="flex-1">
+                    @csrf
+                    <button type="submit"
+                            class="w-full px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-xl transition-colors">
+                        ✅ Confirmar cancelación
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- ═══ SUMMARY CARDS ═══ --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
         <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
             <p class="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">Total Hoy</p>
@@ -35,38 +230,30 @@
         </div>
     </div>
 
-    <!-- Filters -->
+    {{-- ═══ FILTERS ═══ --}}
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-5">
         <form method="GET" action="{{ route('ventas.index') }}" class="flex flex-col sm:flex-row gap-3 flex-wrap">
             <div class="relative flex-1 min-w-[200px]">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text"
-                       id="buscar-venta"
-                       name="buscar"
-                       value="{{ request('buscar') }}"
+                <input type="text" id="buscar-venta" name="buscar" value="{{ request('buscar') }}"
                        placeholder="Buscar por cliente o mascota..."
                        class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-slate-50 transition-all">
             </div>
 
-            <select id="filtro-metodo"
-                    name="metodo_pago"
-                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 bg-slate-50 text-slate-700 w-full sm:w-56 transition-all">
+            <select id="filtro-metodo" name="metodo_pago"
+                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 bg-slate-50 text-slate-700 w-full sm:w-52 transition-all">
                 <option value="">Método de pago</option>
-                <option value="Efectivo"       {{ request('metodo_pago') === 'Efectivo'       ? 'selected' : '' }}>💵 Efectivo</option>
-                <option value="Tarjeta"        {{ request('metodo_pago') === 'Tarjeta'        ? 'selected' : '' }}>💳 Tarjeta</option>
-                <option value="Transferencia"  {{ request('metodo_pago') === 'Transferencia'  ? 'selected' : '' }}>🏦 Transferencia</option>
+                <option value="Efectivo"      {{ request('metodo_pago') === 'Efectivo'      ? 'selected' : '' }}>💵 Efectivo</option>
+                <option value="Tarjeta"       {{ request('metodo_pago') === 'Tarjeta'       ? 'selected' : '' }}>💳 Tarjeta</option>
+                <option value="Transferencia" {{ request('metodo_pago') === 'Transferencia' ? 'selected' : '' }}>🏦 Transferencia</option>
             </select>
 
-            <input type="date"
-                   id="filtro-fecha-venta"
-                   name="fecha"
-                   value="{{ request('fecha') }}"
+            <input type="date" id="filtro-fecha-venta" name="fecha" value="{{ request('fecha') }}"
                    class="px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 bg-slate-50 text-slate-700 transition-all">
 
-            <button type="submit"
-                    class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl w-32 transition-colors">
+            <button type="submit" class="btn-fuego-animated text-white text-sm font-medium w-32 shadow-sm px-5 py-2.5">
                 Filtrar
             </button>
             @if(request()->hasAny(['buscar','metodo_pago','fecha']))
@@ -78,7 +265,7 @@
         </form>
     </div>
 
-    <!-- Sales Table -->
+    {{-- ═══ TABLE ═══ --}}
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
 
         @if($ventas->isNotEmpty())
@@ -94,7 +281,7 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-slate-100 text-xs text-slate-500 uppercase tracking-wider">
-                        <th class="text-left px-6 py-3.5 font-semibold">#</th>
+                        <th class="text-left px-6 py-3.5 font-semibold">Folio</th>
                         <th class="text-left px-6 py-3.5 font-semibold">Cliente / Mascota</th>
                         <th class="text-left px-6 py-3.5 font-semibold hidden lg:table-cell">Productos</th>
                         <th class="text-left px-6 py-3.5 font-semibold hidden md:table-cell">Método</th>
@@ -107,6 +294,7 @@
                 <tbody class="divide-y divide-slate-50">
                     @forelse($ventas as $venta)
                         @php
+                            $folio = 'VNT-' . str_pad($venta->id, 3, '0', STR_PAD_LEFT);
                             $metodoPagoEmoji = match($venta->metodo_pago) {
                                 'Efectivo' => '💵', 'Tarjeta' => '💳', 'Transferencia' => '🏦', default => '💰',
                             };
@@ -119,7 +307,7 @@
                         @endphp
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4">
-                                <span class="text-xs font-mono text-slate-400">#{{ $venta->id }}</span>
+                                <span class="text-xs font-mono font-bold text-slate-600">{{ $folio }}</span>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
@@ -128,7 +316,8 @@
                                     </div>
                                     <div>
                                         <p class="font-medium text-slate-800">
-                                            {{ $venta->cliente->nombre ?? '—' }} {{ $venta->cliente->apellido ?? '' }}
+                                            {{ $venta->cliente->nombre ?? '—' }}
+                                            {{ $venta->cliente->apellido_paterno ?? $venta->cliente->apellido ?? '' }}
                                         </p>
                                         @if($venta->mascota)
                                             <p class="text-xs text-slate-500 mt-0.5">🐾 {{ $venta->mascota->nombre }}</p>
@@ -165,26 +354,34 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-center gap-1">
-                                    <a href="{{ route('ventas.show', $venta) }}"
-                                       title="Ver detalle"
-                                       class="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                                    {{-- Ver Detalle --}}
+                                    <button type="button"
+                                            title="Ver detalle"
+                                            @click="$dispatch('ver-venta', { id: {{ $venta->id }} })"
+                                            class="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
-                                    </a>
-                                    <form method="POST" action="{{ route('ventas.destroy', $venta) }}"
-                                          onsubmit="return confirm('¿Eliminar la venta #{{ $venta->id }}?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                title="Eliminar"
+                                    </button>
+
+                                    {{-- Cancelar Venta --}}
+                                    @if($venta->estado !== 'cancelada')
+                                        <button type="button"
+                                                title="Cancelar venta"
+                                                @click="$dispatch('cancelar-venta', { id: {{ $venta->id }}, folio: '{{ $folio }}' })"
                                                 class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                                             </svg>
                                         </button>
-                                    </form>
+                                    @else
+                                        <span class="p-1.5 text-slate-200 cursor-not-allowed rounded-lg" title="Ya cancelada">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                            </svg>
+                                        </span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -201,7 +398,7 @@
                                     </p>
                                     @if(!request()->hasAny(['buscar','metodo_pago','fecha']))
                                         <a href="{{ route('ventas.create') }}"
-                                           class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+                                           class="btn-fuego-animated inline-flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                             </svg>
@@ -217,10 +414,56 @@
         </div>
 
         @if($ventas->hasPages())
-            <div class="px-6 py-4 border-t border-slate-100">
+            <div class="px-6 py-4 border-t border-slate-100 min-h-[72px]">
                 {{ $ventas->links() }}
             </div>
         @endif
     </div>
+
+    <script>
+    function verVentaModal() {
+        return {
+            open: false, cargando: false, venta: null,
+
+            async abrir(id) {
+                this.open = true; this.cargando = true; this.venta = null;
+                try {
+                    const r = await fetch(`/ventas/${id}`, {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await r.json();
+                    const clienteNombre = data.cliente
+                        ? (data.cliente.nombre + ' ' + (data.cliente.apellido_paterno ?? data.cliente.apellido ?? '')).trim()
+                        : '—';
+                    const fecha = new Date(data.venta.created_at);
+                    this.venta = {
+                        ...data.venta,
+                        folio:             data.folio,
+                        cliente_nombre:    clienteNombre,
+                        mascota_nombre:    data.mascota?.nombre ?? '—',
+                        cajero:            data.user?.name ?? '—',
+                        productos:         data.productos,
+                        created_at_formatted: fecha.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+                    };
+                } catch(e) { this.cerrar(); }
+                finally { this.cargando = false; }
+            },
+
+            cerrar() { this.open = false; },
+
+            fmt(n) {
+                return Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            },
+        };
+    }
+
+    function cancelarVentaModal() {
+        return {
+            open: false, ventaId: null, folio: '',
+            abrir(id, folio) { this.open = true; this.ventaId = id; this.folio = folio; },
+            cerrar() { this.open = false; },
+        };
+    }
+    </script>
 
 </x-app-layout>

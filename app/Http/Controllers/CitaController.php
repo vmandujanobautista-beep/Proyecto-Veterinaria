@@ -57,7 +57,7 @@ class CitaController extends Controller
             $query->whereDate('fecha', '<=', $fechaHasta);
         }
 
-        $citas = $query->paginate(15)->withQueryString();
+        $citas = $query->paginate(10)->withQueryString();
 
         // Conteo agrupado en un solo query
         $conteoEstados = Cita::selectRaw('estado, count(*) as total')

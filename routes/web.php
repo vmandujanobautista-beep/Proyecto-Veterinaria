@@ -37,7 +37,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/productos/{producto}/solicitar-reabastecimiento', [ProductoController::class, 'solicitarReabastecimiento'])
          ->name('productos.solicitar-reabastecimiento');
     Route::resource('productos', ProductoController::class);
+    // Rutas API de ventas (deben ir ANTES del resource para evitar conflictos)
+    Route::get('/api/ventas/productos',                 [VentaController::class, 'getProductos'])->name('api.ventas.productos');
+    Route::get('/api/ventas/{cliente}/mascotas',        [VentaController::class, 'getMascotasCliente'])->name('api.ventas.mascotas');
     Route::resource('ventas', VentaController::class);
+    Route::post('/ventas/{venta}/cancelar',             [VentaController::class, 'cancelar'])->name('ventas.cancelar');
 
     Route::post('/citas/{cita}/confirmar',        [CitaController::class, 'confirmar'])->name('citas.confirmar');
     Route::post('/citas/{cita}/confirmar-whatsapp',[CitaController::class, 'confirmarWhatsapp'])->name('citas.confirmar-whatsapp');

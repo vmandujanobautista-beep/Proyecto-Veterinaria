@@ -253,6 +253,7 @@
                                id="modal-enviado_email"
                                name="enviado_email"
                                value="1"
+                               x-model="enviarEmail"
                                :disabled="!clienteEmail"
                                class="w-4 h-4 rounded text-violet-600 border-slate-300 focus:ring-violet-500">
                         <span class="text-sm text-slate-700">
@@ -270,6 +271,7 @@
                                id="modal-enviado_whatsapp"
                                name="enviado_whatsapp"
                                value="1"
+                               x-model="enviarWhatsapp"
                                :disabled="!clienteTelefono"
                                class="w-4 h-4 rounded text-violet-600 border-slate-300 focus:ring-violet-500">
                         <span class="text-sm text-slate-700">
@@ -281,6 +283,9 @@
                                   class="text-amber-600 text-xs ml-1">(sin teléfono registrado)</span>
                         </span>
                     </label>
+                    <p x-show="!enviarEmail && !enviarWhatsapp && clienteSeleccionado" class="text-xs text-rose-500 mt-2 font-medium">
+                        * Debes seleccionar al menos un método de notificación.
+                    </p>
                 </div>
             </div>
 
@@ -294,7 +299,7 @@
                 </button>
                 <button type="submit"
                         id="btn-submit-agendar"
-                        :disabled="enviando"
+                        :disabled="enviando || (!enviarEmail && !enviarWhatsapp && clienteSeleccionado)"
                         class="inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700
                                active:scale-95 text-white text-sm font-semibold px-6 py-2.5 rounded-xl
                                transition-all duration-200 shadow-sm hover:shadow-md w-full sm:w-auto
@@ -331,6 +336,8 @@ function agendarCitaModal() {
         sinMascotas: false,
         clienteEmail: '',
         clienteTelefono: '',
+        enviarEmail: false,
+        enviarWhatsapp: false,
         mascotaPlaceholder: '— Primero selecciona un cliente —',
         hoy: new Date().toISOString().split('T')[0],
 
@@ -353,6 +360,8 @@ function agendarCitaModal() {
             this.sinMascotas = false;
             this.clienteEmail = '';
             this.clienteTelefono = '';
+            this.enviarEmail = false;
+            this.enviarWhatsapp = false;
             this.mascotaPlaceholder = '— Primero selecciona un cliente —';
 
             const form = document.getElementById('form-agendar-cita');

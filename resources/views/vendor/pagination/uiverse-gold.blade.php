@@ -1,44 +1,25 @@
 @if ($paginator->hasPages())
-    <nav class="flex items-center justify-center">
-        <div
-            class="flex items-center justify-center [&_a]:[box-shadow:#0000001f_0_1px_3px,#0000003d_0_0_1px] [&_a]:[transition:all_.25s_ease] [&_span]:[box-shadow:#0000001f_0_1px_3px,#0000003d_0_0_1px] [&_span]:[transition:all_.25s_ease]">
-
+    <nav class="flex items-center justify-center mt-8 mb-4">
+        <div class="flex items-center justify-center group">
             {{-- Previous Page Link --}}
             @if ($paginator->onFirstPage())
-                <span
-                    class="flex items-center justify-center text-xl font-bold leading-none text-zinc-300 p-2 bg-slate-50 relative rounded-full border border-solid border-zinc-200 size-11 z-[4] cursor-not-allowed">
-                    &laquo;
-                </span>
+                <span class="flex items-center justify-center text-xl font-bold leading-none text-zinc-300 bg-slate-50 relative rounded-full border border-solid border-zinc-200 size-11 z-[4] cursor-not-allowed transition-all duration-300 ease-out shadow-sm origin-center group-hover:scale-90">&laquo;</span>
             @else
-                <a href="{{ $paginator->previousPageUrl() }}"
-                    class="flex items-center justify-center text-xl font-bold leading-none text-zinc-500 p-2 bg-white relative rounded-full border border-solid border-zinc-300 size-11 z-[4] cursor-pointer hover:z-[50] hover:scale-110 hover:text-amber-500">
-                    &laquo;
-                </a>
+                <a href="{{ $paginator->previousPageUrl() }}" class="flex items-center justify-center text-xl font-bold leading-none text-zinc-500 bg-white relative rounded-full border border-solid border-zinc-300 size-11 z-[4] cursor-pointer transition-all duration-300 ease-out shadow-sm origin-center group-hover:scale-90 hover:!scale-150 hover:!z-[50] hover:!text-amber-500 hover:!border-amber-500 hover:shadow-[0_0_15px_rgba(245,158,11,0.4)]">&laquo;</a>
             @endif
 
             {{-- Pagination Elements --}}
             @foreach ($elements as $element)
-                {{-- "Three Dots" Separator --}}
                 @if (is_string($element))
-                    <span
-                        class="flex items-center justify-center text-lg font-extrabold leading-none text-zinc-400 p-4 bg-white relative rounded-full border border-solid border-zinc-300 size-11 z-[4] -ml-2 cursor-default">
-                        {{ $element }}
-                    </span>
+                    <span class="flex items-center justify-center text-lg font-extrabold leading-none text-zinc-400 bg-white relative rounded-full border border-solid border-zinc-300 size-11 z-[4] -ml-2 cursor-default transition-all duration-300 ease-out shadow-sm origin-center group-hover:scale-90 hover:!scale-150 hover:!z-[50]">{{ $element }}</span>
                 @endif
 
-                {{-- Array Of Links --}}
                 @if (is_array($element))
                     @foreach ($element as $page => $url)
                         @if ($page == $paginator->currentPage())
-                            <span
-                                class="flex items-center justify-center text-2xl font-extrabold leading-none text-amber-500 p-4 bg-white relative rounded-full border-2 border-solid border-amber-500 size-14 z-[6] -ml-2 cursor-default shadow-md">
-                                {{ $page }}
-                            </span>
+                            <span class="flex items-center justify-center text-2xl font-extrabold leading-none text-white bg-amber-500 relative rounded-full border-2 border-solid border-amber-500 size-14 z-[6] -ml-2 cursor-default shadow-md transition-all duration-300 ease-out origin-center group-hover:scale-75 group-hover:bg-amber-400 group-hover:border-amber-400 group-hover:text-amber-50 hover:!scale-110 hover:!z-[50] hover:!bg-amber-600 hover:!border-amber-600 hover:!text-white hover:shadow-[0_0_20px_rgba(245,158,11,0.6)]">{{ $page }}</span>
                         @else
-                            <a href="{{ $url }}"
-                                class="flex items-center justify-center text-xl font-extrabold leading-none text-zinc-400 p-4 bg-white relative rounded-full border border-solid border-zinc-300 size-11 z-[4] -ml-2 cursor-pointer hover:z-[50] hover:scale-125 hover:text-amber-500">
-                                {{ $page }}
-                            </a>
+                            <a href="{{ $url }}" class="flex items-center justify-center text-xl font-extrabold leading-none text-zinc-500 bg-white relative rounded-full border border-solid border-zinc-300 size-11 z-[4] -ml-2 cursor-pointer transition-all duration-300 ease-out shadow-sm origin-center group-hover:scale-90 group-hover:text-zinc-400 hover:!scale-150 hover:!z-[50] hover:!text-amber-500 hover:!border-amber-500 hover:shadow-[0_0_15px_rgba(245,158,11,0.4)]">{{ $page }}</a>
                         @endif
                     @endforeach
                 @endif
@@ -46,15 +27,9 @@
 
             {{-- Next Page Link --}}
             @if ($paginator->hasMorePages())
-                <a href="{{ $paginator->nextPageUrl() }}"
-                    class="flex items-center justify-center text-xl font-bold leading-none text-zinc-500 p-2 bg-white relative rounded-full border border-solid border-zinc-300 size-11 z-[4] -ml-2 cursor-pointer hover:z-[50] hover:scale-110 hover:text-amber-500">
-                    &raquo;
-                </a>
+                <a href="{{ $paginator->nextPageUrl() }}" class="flex items-center justify-center text-xl font-bold leading-none text-zinc-500 bg-white relative rounded-full border border-solid border-zinc-300 size-11 z-[4] -ml-2 cursor-pointer transition-all duration-300 ease-out shadow-sm origin-center group-hover:scale-90 hover:!scale-150 hover:!z-[50] hover:!text-amber-500 hover:!border-amber-500 hover:shadow-[0_0_15px_rgba(245,158,11,0.4)]">&raquo;</a>
             @else
-                <span
-                    class="flex items-center justify-center text-xl font-bold leading-none text-zinc-300 p-2 bg-slate-50 relative rounded-full border border-solid border-zinc-200 size-11 z-[4] -ml-2 cursor-not-allowed">
-                    &raquo;
-                </span>
+                <span class="flex items-center justify-center text-xl font-bold leading-none text-zinc-300 bg-slate-50 relative rounded-full border border-solid border-zinc-200 size-11 z-[4] -ml-2 cursor-not-allowed transition-all duration-300 ease-out shadow-sm origin-center group-hover:scale-90">&raquo;</span>
             @endif
         </div>
     </nav>

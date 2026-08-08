@@ -1,4 +1,116 @@
 <x-app-layout>
+    <style>
+        .btn-citas-purple {
+            border: none;
+            color: #fff !important;
+            background-image: linear-gradient(30deg, #7e22ce, #c026d3);
+            border-radius: 12px !important;
+            background-size: 100% auto;
+            transition: background-position 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-citas-purple:hover {
+            background-position: right center;
+            background-size: 200% auto;
+            animation: pulse-purple 1.5s infinite;
+        }
+
+        @keyframes pulse-purple {
+            0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+        }
+
+        /* Eye Icon Animation */
+        @keyframes blink-pupil {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes blink-eye {
+            0% { transform: scaleY(1); }
+            50% { transform: scaleY(0.6); }
+            100% { transform: scaleY(1); }
+        }
+        .group\/btn-eye:hover .eye-pupil { animation: blink-pupil 0.4s ease-in-out; }
+        .group\/btn-eye:hover .eye-shape { animation: blink-eye 0.4s ease-in-out; }
+        .eye-pupil, .eye-shape { transform-origin: center; }
+
+        /* User Check Icon Animation */
+        @keyframes user-avatar-hover {
+            from { transform: scale(1) translateY(0); }
+            to { transform: scale(1.05) translateY(-1px); }
+        }
+        @keyframes check-mark-draw {
+            0% { stroke-dashoffset: 20; transform: scale(1); }
+            100% { stroke-dashoffset: 0; transform: scale(1.1); }
+        }
+        .group\/btn-check:hover .user-avatar { animation: user-avatar-hover 0.25s ease-out forwards; }
+        .group\/btn-check:hover .check-mark { animation: check-mark-draw 0.4s ease-out forwards; }
+        .user-avatar { transform-origin: center; transition: transform 0.2s; }
+        .check-mark {
+            stroke-dasharray: 20;
+            stroke-dashoffset: 0;
+            transform-origin: 18px 19px;
+            transition: transform 0.25s;
+        }
+
+        /* Simple Checked Icon Animation */
+        @keyframes check-path-redraw {
+            0% { stroke-dashoffset: 0; }
+            20% { stroke-dashoffset: 24; }
+            100% { stroke-dashoffset: 0; }
+        }
+        .group\/btn-complete:hover .check-path { animation: check-path-redraw 0.5s ease-in-out; }
+        .check-path {
+            stroke-dasharray: 24;
+            stroke-dashoffset: 0;
+        }
+
+        /* Whatsapp Icon Animation */
+        @keyframes phone-ring {
+            0% { transform: rotate(0deg); }
+            16% { transform: rotate(-15deg); }
+            33% { transform: rotate(15deg); }
+            50% { transform: rotate(-10deg); }
+            66% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .group\/btn-whatsapp:not(:disabled):hover .phone-icon { animation: phone-ring 0.4s ease-in-out; }
+        .phone-icon { transform-origin: 50% 50%; }
+
+        /* Send Icon Animation */
+        @keyframes send-fly {
+            0% { transform: translate(0, 0); opacity: 1; }
+            49.9% { transform: translate(24px, -24px); opacity: 0; }
+            50% { transform: translate(-24px, 24px); opacity: 0; }
+            100% { transform: translate(0, 0); opacity: 1; }
+        }
+        .group\/btn-send:not(:disabled):hover .send-icon { animation: send-fly 0.5s ease-in-out forwards; }
+        .send-icon { transform-origin: center; }
+
+        /* Pen Icon Animation */
+        @keyframes pen-wiggle {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(1px, -2px) rotate(-6deg); }
+            20% { transform: translate(-1px, -4px) rotate(-4deg); }
+            30% { transform: translate(1px, -6px) rotate(-6deg); }
+            40% { transform: translate(-1px, -8px) rotate(-4deg); }
+            51.6% { transform: translate(0, -10px) rotate(0deg); }
+            83.9% { transform: translate(0, -10px) rotate(0deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        @keyframes pen-slash-draw {
+            0%, 51.6% { stroke-dashoffset: 10; opacity: 0; }
+            71% { stroke-dashoffset: 0; opacity: 1; }
+            83.9%, 100% { stroke-dashoffset: 10; opacity: 0; }
+        }
+        .group\/btn-edit:hover .pen-group { animation: pen-wiggle 1.55s ease-in-out infinite; }
+        .group\/btn-edit:hover .pen-slash { animation: pen-slash-draw 1.55s ease-out infinite; }
+        .pen-group { transform-origin: 50% 50%; transform-box: fill-box; }
+        .pen-slash { stroke-dasharray: 10; stroke-dashoffset: 10; opacity: 0; }
+    </style>
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
@@ -8,9 +120,7 @@
             <button type="button"
                     id="btn-agendar-cita"
                     @click="$dispatch('agendar-cita')"
-                    class="ml-4 mt-2 inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700
-                           text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all
-                           duration-200 shadow-sm hover:shadow-md active:scale-95">
+                    class="ml-4 mt-2 inline-flex items-center gap-2 btn-citas-purple px-5 py-2.5 text-sm font-semibold shadow-sm active:scale-95">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -81,12 +191,12 @@
                            class="px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none
                                   focus:ring-2 focus:ring-violet-500 bg-slate-50 text-slate-700 transition-all">
                     <button type="submit"
-                            class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition-colors">
+                            class="px-5 py-2.5 btn-citas-purple text-sm font-medium w-32 shadow-sm active:scale-95">
                         Filtrar
                     </button>
                     @if(request()->hasAny(['buscar','estado','fecha_filtro','fecha_desde','fecha_hasta']))
                         <a href="{{ route('citas.index') }}"
-                           class="px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors">
+                           class="px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors text-center no-underline" style="height: fit-content;">
                             Limpiar
                         </a>
                     @endif
@@ -118,9 +228,6 @@
                     Mostrando <span class="text-slate-800 font-bold">{{ $citas->count() }}</span> de
                     <span class="text-slate-800 font-bold">{{ $citas->total() }}</span> citas
                 </p>
-                @if(request()->hasAny(['buscar','estado','fecha_filtro','fecha_desde','fecha_hasta']))
-                    <span class="text-xs text-violet-600 font-medium">Filtros activos</span>
-                @endif
             </div>
         @endif
 
@@ -135,7 +242,6 @@
                         <th class="text-left px-5 py-3.5 font-semibold hidden lg:table-cell">Servicio</th>
                         <th class="text-left px-5 py-3.5 font-semibold">Precio</th>
                         <th class="text-center px-5 py-3.5 font-semibold">Estado</th>
-                        <th class="text-center px-5 py-3.5 font-semibold hidden md:table-cell">Notif.</th>
                         <th class="text-center px-5 py-3.5 font-semibold">Acciones</th>
                     </tr>
                 </thead>
@@ -241,16 +347,6 @@
                                 </span>
                             </td>
 
-                            {{-- Notificaciones --}}
-                            <td class="px-5 py-3.5 text-center hidden md:table-cell">
-                                <div class="flex items-center justify-center gap-2">
-                                    <span title="{{ $cita->enviado_email ? 'Email enviado' : 'Email no enviado' }}"
-                                          class="text-base {{ $cita->enviado_email ? 'opacity-100' : 'opacity-20 grayscale' }}">📧</span>
-                                    <span title="{{ $cita->enviado_whatsapp ? 'WhatsApp enviado' : 'WhatsApp no enviado' }}"
-                                          class="text-base {{ $cita->enviado_whatsapp ? 'opacity-100' : 'opacity-20 grayscale' }}">📱</span>
-                                </div>
-                            </td>
-
                             {{-- Acciones --}}
                             <td class="px-5 py-3.5">
                                 <div class="flex items-center justify-center gap-1">
@@ -259,12 +355,15 @@
                                     <button type="button"
                                             title="Ver detalle"
                                             @click="$dispatch('ver-cita', { id: {{ $cita->id }} })"
-                                            class="p-1.5 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            class="group/btn-eye p-1.5 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <!-- Pupil -->
+                                            <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" class="eye-pupil" />
+                                            <!-- Eye shape -->
+                                            <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" class="eye-shape" />
                                         </svg>
                                     </button>
 
@@ -274,9 +373,17 @@
                                             @csrf
                                             <button type="submit"
                                                     title="Confirmar cita"
-                                                    class="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    class="group/btn-check p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                    <!-- User avatar -->
+                                                    <g class="user-avatar">
+                                                        <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                                                        <path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
+                                                    </g>
+                                                    <!-- Checkmark -->
+                                                    <path d="M15 19l2 2l4 -4" class="check-mark" />
                                                 </svg>
                                             </button>
                                         </form>
@@ -288,10 +395,11 @@
                                             @csrf
                                             <button type="submit"
                                                     title="Marcar como completada"
-                                                    class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    class="group/btn-complete p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                     fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                    <path d="M5 12l5 5l10 -10" class="check-path" />
                                                 </svg>
                                             </button>
                                         </form>
@@ -315,14 +423,18 @@
                                     <form method="POST" action="{{ route('citas.enviar-email', $cita) }}">
                                         @csrf
                                         <button type="submit"
-                                                title="{{ $cita->enviado_email ? 'Reenviar email' : 'Enviar recordatorio por email' }}"
-                                                class="p-1.5 rounded-lg transition-colors
-                                                       {{ $cita->enviado_email
+                                                title="{{ $cita->estado === 'completada' ? 'Cita completada' : ($cita->enviado_email ? 'Reenviar email' : 'No seleccionado') }}"
+                                                {{ (!$cita->enviado_email || $cita->estado === 'completada') ? 'disabled' : '' }}
+                                                class="group/btn-send p-1.5 rounded-lg transition-colors
+                                                       {{ ($cita->enviado_email && $cita->estado !== 'completada')
                                                            ? 'text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50'
-                                                           : 'text-slate-300 hover:text-slate-500 hover:bg-slate-50' }}">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                                           : 'text-slate-300 opacity-50 cursor-not-allowed' }}">
+                                            <svg class="w-4 h-4 overflow-visible" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <g class="send-icon">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                    <path d="M10 14l11 -11" />
+                                                    <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+                                                </g>
                                             </svg>
                                         </button>
                                     </form>
@@ -331,27 +443,43 @@
                                     <form method="POST" action="{{ route('citas.enviar-whatsapp', $cita) }}">
                                         @csrf
                                         <button type="submit"
-                                                title="{{ $cita->enviado_whatsapp ? 'Reenviar WhatsApp' : 'Enviar recordatorio por WhatsApp' }}"
-                                                class="p-1.5 rounded-lg transition-colors
-                                                       {{ $cita->enviado_whatsapp
+                                                title="{{ $cita->estado === 'completada' ? 'Cita completada' : ($cita->enviado_whatsapp ? 'Reenviar WhatsApp' : 'No seleccionado') }}"
+                                                {{ (!$cita->enviado_whatsapp || $cita->estado === 'completada') ? 'disabled' : '' }}
+                                                class="group/btn-whatsapp p-1.5 rounded-lg transition-colors
+                                                       {{ ($cita->enviado_whatsapp && $cita->estado !== 'completada')
                                                            ? 'text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50'
-                                                           : 'text-slate-300 hover:text-slate-500 hover:bg-slate-50' }}">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                           : 'text-slate-300 opacity-50 cursor-not-allowed' }}">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" />
+                                                <path class="phone-icon" d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" />
                                             </svg>
                                         </button>
                                     </form>
 
                                     {{-- Editar --}}
-                                    <a href="{{ route('citas.edit', $cita) }}"
-                                       title="Editar cita"
-                                       class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </a>
+                                    @if(in_array($cita->estado, ['completada', 'confirmada', 'cancelada']))
+                                        <span title="Acción no disponible ({{ $cita->estado }})"
+                                              class="p-1.5 text-slate-300 opacity-50 cursor-not-allowed rounded-lg">
+                                            <svg class="w-4 h-4" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-miterlimit="10">
+                                                <g class="pen-group">
+                                                    <path class="pen-body" d="m10.5,27.5l-8,2 2-8L22.257,3.743c1.657-1.657,4.343-1.657,6,0s1.657,4.343,0,6L10.5,27.5Z" />
+                                                </g>
+                                            </svg>
+                                        </span>
+                                    @else
+                                        <button type="button"
+                                                title="Editar cita"
+                                                @click="$dispatch('editar-cita', { id: {{ $cita->id }} })"
+                                                class="group/btn-edit p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4 overflow-visible" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-miterlimit="10">
+                                                <g class="pen-group">
+                                                    <path class="pen-slash" d="M20 6 L26 12" />
+                                                    <path class="pen-body" d="m10.5,27.5l-8,2 2-8L22.257,3.743c1.657-1.657,4.343-1.657,6,0s1.657,4.343,0,6L10.5,27.5Z" />
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    @endif
 
                                 </div>
                             </td>
@@ -374,8 +502,7 @@
                                     @if(!request()->hasAny(['buscar','estado','fecha_filtro','fecha_desde','fecha_hasta']))
                                         <button type="button"
                                                 @click="$dispatch('agendar-cita')"
-                                                class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700
-                                                       text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+                                                class="inline-flex items-center gap-2 btn-citas-purple px-5 py-2.5 text-sm font-semibold shadow-sm active:scale-95">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                             </svg>
@@ -393,7 +520,7 @@
         {{-- Paginación --}}
         @if($citas->hasPages())
             <div class="px-6 py-4 border-t border-slate-100">
-                {{ $citas->links() }}
+                {{ $citas->links('vendor.pagination.uiverse-purple') }}
             </div>
         @endif
     </div>

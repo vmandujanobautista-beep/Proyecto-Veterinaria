@@ -437,6 +437,7 @@
     @include('partials.modals.modal-agendar-cita')
     @include('partials.modals.modal-ver-cita')
     @include('partials.modals.modal-cancelar-cita')
+    @include('partials.modals.modal-editar-cita')
 
     {{-- ===== LOADING SCREEN ===== --}}
     <x-loading-screen />

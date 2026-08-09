@@ -87,6 +87,9 @@
                         </svg>
                         <input type="text"
                                id="pos-buscar"
+                               readonly
+                               onfocus="this.removeAttribute('readonly')"
+                               autocomplete="off"
                                placeholder="Buscar producto por nombre o código..."
                                x-model="buscar"
                                @input.debounce.400ms="buscarProductos()"
@@ -422,6 +425,19 @@
         </div>
     </div>
 
+    {{-- Modal de Confirmación de Salida --}}
+    <div id="modal-salida" class="fixed inset-0 z-[300] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm transform transition-all">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">El Sistema dice</h3>
+            <p class="text-sm text-slate-600 mb-4">Para salir de la Venta Actual, ingresa la contraseña de Admin:</p>
+            <input type="password" id="input-pass-salida" class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm mb-4" placeholder="Contraseña">
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="cerrarModalSalida()" class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Cancelar</button>
+                <button type="button" onclick="confirmarSalida()" class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-sm">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     function posApp() {
         return {
@@ -643,6 +659,43 @@
             },
         };
     }
+    // Variables globales para el modal de salida
+    let targetUrlForExit = null;
+    const modalSalida = document.getElementById('modal-salida');
+    const inputPassSalida = document.getElementById('input-pass-salida');
+
+    function abrirModalSalida(url) {
+        targetUrlForExit = url;
+        modalSalida.classList.remove('hidden');
+        modalSalida.classList.add('flex');
+        inputPassSalida.value = '';
+        setTimeout(() => inputPassSalida.focus(), 50);
+    }
+
+    function cerrarModalSalida() {
+        modalSalida.classList.add('hidden');
+        modalSalida.classList.remove('flex');
+        targetUrlForExit = null;
+    }
+
+    function confirmarSalida() {
+        if (inputPassSalida.value === 'PASSWORD') {
+            window.location.href = targetUrlForExit;
+        } else {
+            alert('Contraseña incorrecta');
+            inputPassSalida.value = '';
+            inputPassSalida.focus();
+        }
+    }
+
+    if (inputPassSalida) {
+        inputPassSalida.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmarSalida();
+            }
+        });
+    }
 
     // Interceptar cualquier enlace de navegación (menú lateral, botón atrás, etc.)
     document.addEventListener('click', function(e) {
@@ -650,16 +703,13 @@
         
         // Verificamos que sea un enlace válido, que no sea la página actual y que no sea un enlace vacío/hash (#)
         if (link && link.href && !link.href.includes('#') && !link.href.startsWith('javascript:')) {
+            // Ignoramos clics dentro del propio modal (botones cancelar/aceptar, etc)
+            if (modalSalida && modalSalida.contains(link)) return;
+
             // Verificamos si estamos saliendo de esta URL
             if (link.href !== window.location.href) {
                 e.preventDefault();
-                const pass = prompt('Para salir de la Venta Actual, ingresa la contraseña de Admin:');
-                
-                if (pass === 'PASSWORD') {
-                    window.location.href = link.href;
-                } else if (pass !== null) {
-                    alert('Contraseña incorrecta');
-                }
+                abrirModalSalida(link.href);
             }
         }
     });

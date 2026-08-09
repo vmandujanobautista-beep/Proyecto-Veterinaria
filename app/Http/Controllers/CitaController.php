@@ -9,6 +9,7 @@ use App\Models\Mascota;
 use App\Services\WhatsappService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Events\CitaCreada;
 use App\Events\CitaEditada;
 use App\Events\CitaEliminada;
@@ -104,13 +105,21 @@ class CitaController extends Controller
         event(new CitaCreada($cita));
 
         // Enviar email si se marcó la opción
-        if ($data['enviado_email'] && $cita->cliente?->email) {
-            Mail::to($cita->cliente->email)->queue(new CitaConfirmacionMail($cita));
+        try {
+            if ($data['enviado_email'] && $cita->cliente?->email) {
+                Mail::to($cita->cliente->email)->queue(new CitaConfirmacionMail($cita));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error al enviar email de cita: ' . $e->getMessage());
         }
 
         // Enviar WhatsApp si se marcó la opción
-        if ($data['enviado_whatsapp'] && $cita->cliente?->telefono) {
-            app(WhatsappService::class)->enviarConfirmacionCita($cita);
+        try {
+            if ($data['enviado_whatsapp'] && $cita->cliente?->telefono) {
+                app(WhatsappService::class)->enviarConfirmacionCita($cita);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error al enviar WhatsApp de cita: ' . $e->getMessage());
         }
 
         if ($request->expectsJson()) {
@@ -186,8 +195,13 @@ class CitaController extends Controller
     {
         $cita->update(['estado' => 'confirmada']);
 
-        if ($cita->cliente?->email) {
-            Mail::to($cita->cliente->email)->queue(new CitaConfirmacionMail($cita));
+        try {
+            if ($cita->cliente?->email) {
+                Mail::to($cita->cliente->email)->queue(new CitaConfirmacionMail($cita));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error al confirmar cita por email: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Cita confirmada, pero hubo un error al enviar el correo.');
         }
 
         return redirect()->back()->with('success', 'Cita confirmada y correo enviado.');
@@ -198,9 +212,13 @@ class CitaController extends Controller
      */
     public function confirmarWhatsapp(Cita $cita)
     {
-        app(WhatsappService::class)->enviarConfirmacionCita($cita);
-
-        return redirect()->back()->with('success', 'Mensaje de WhatsApp enviado.');
+        try {
+            app(WhatsappService::class)->enviarConfirmacionCita($cita);
+            return redirect()->back()->with('success', 'Mensaje de WhatsApp enviado.');
+        } catch (\Throwable $e) {
+            Log::error('Error al confirmar cita por WhatsApp: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Ocurrió un error al intentar enviar el mensaje de WhatsApp.');
+        }
     }
 
     /**
@@ -238,9 +256,14 @@ class CitaController extends Controller
         $cita->load('cliente');
 
         if ($cita->cliente?->email) {
-            Mail::to($cita->cliente->email)->queue(new CitaConfirmacionMail($cita));
-            $cita->update(['enviado_email' => true]);
-            return redirect()->back()->with('success', 'Recordatorio por email enviado a ' . $cita->cliente->email);
+            try {
+                Mail::to($cita->cliente->email)->queue(new CitaConfirmacionMail($cita));
+                $cita->update(['enviado_email' => true]);
+                return redirect()->back()->with('success', 'Recordatorio por email enviado a ' . $cita->cliente->email);
+            } catch (\Throwable $e) {
+                Log::error('Error al enviar recordatorio por email: ' . $e->getMessage());
+                return redirect()->back()->with('error', 'Ocurrió un error al intentar enviar el recordatorio por correo.');
+            }
         }
 
         return redirect()->back()->with('error', 'El cliente no tiene email registrado.');
@@ -254,9 +277,14 @@ class CitaController extends Controller
         $cita->load('cliente');
 
         if ($cita->cliente?->telefono) {
-            app(WhatsappService::class)->enviarConfirmacionCita($cita);
-            $cita->update(['enviado_whatsapp' => true]);
-            return redirect()->back()->with('success', 'Recordatorio por WhatsApp enviado.');
+            try {
+                app(WhatsappService::class)->enviarConfirmacionCita($cita);
+                $cita->update(['enviado_whatsapp' => true]);
+                return redirect()->back()->with('success', 'Recordatorio por WhatsApp enviado.');
+            } catch (\Throwable $e) {
+                Log::error('Error al enviar recordatorio por WhatsApp: ' . $e->getMessage());
+                return redirect()->back()->with('error', 'Ocurrió un error al intentar enviar el recordatorio por WhatsApp.');
+            }
         }
 
         return redirect()->back()->with('error', 'El cliente no tiene teléfono registrado.');

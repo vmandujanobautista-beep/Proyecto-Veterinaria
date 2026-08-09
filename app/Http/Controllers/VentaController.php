@@ -10,6 +10,7 @@ use App\Models\VentaProducto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Events\VentaCreada;
 use App\Events\VentaEliminada;
 
@@ -149,7 +150,7 @@ class VentaController extends Controller
             return redirect()->route('ventas.show', $venta)
                              ->with('success', 'Venta registrada correctamente.');
 
-        } catch (\Throwable $e) {
+        } catch (\RuntimeException $e) {
             DB::rollBack();
 
             if ($request->expectsJson()) {
@@ -157,6 +158,15 @@ class VentaController extends Controller
             }
 
             return back()->withErrors(['error' => $e->getMessage()])->withInput();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Error al registrar venta: ' . $e->getMessage());
+
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Ocurrió un error inesperado al procesar la venta. Por favor, inténtelo de nuevo.'], 500);
+            }
+
+            return back()->withErrors(['error' => 'Ocurrió un error inesperado al procesar la venta. Por favor, inténtelo de nuevo.'])->withInput();
         }
     }
 
@@ -190,7 +200,10 @@ class VentaController extends Controller
     public function cancelar(Venta $venta)
     {
         if ($venta->estado === 'cancelada') {
-            return back()->withErrors(['error' => 'La venta ya está cancelada.']);
+            if (request()->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'La venta ya ha sido cancelada previamente.'], 422);
+            }
+            return back()->withErrors(['error' => 'La venta ya ha sido cancelada previamente.']);
         }
 
         DB::beginTransaction();
@@ -216,12 +229,13 @@ class VentaController extends Controller
 
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error('Error al cancelar venta: ' . $e->getMessage());
 
             if (request()->expectsJson()) {
-                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+                return response()->json(['success' => false, 'message' => 'Ocurrió un error inesperado al cancelar la venta. Por favor, inténtelo de nuevo.'], 500);
             }
 
-            return back()->withErrors(['error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Ocurrió un error inesperado al cancelar la venta. Por favor, inténtelo de nuevo.']);
         }
     }
 

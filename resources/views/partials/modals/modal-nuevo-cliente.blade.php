@@ -17,7 +17,7 @@
     x-transition:leave-end="opacity-0"
     class="fixed inset-0 z-[80] flex items-center justify-center p-4"
     @keydown.escape.window="if(subModalOpen){ resetSubModal(); } else { clienteModalOpen = false; }"
-    @nuevo-cliente.window="modo = 'crear'; clienteId = null; clienteModalOpen = true;"
+    @nuevo-cliente.window="modo = 'crear'; clienteId = null; clienteModalOpen = true; redirectUrl = $event.detail?.redirect || null;"
     @editar-cliente.window="cargarCliente($event.detail.id)"
 >
     {{-- Backdrop --}}
@@ -708,6 +708,7 @@ function nuevoClienteComponent() {
 
             /* ── Mascotas añadidas durante esta sesión ── */
             mascotas: [],
+            redirectUrl: null,
             subModalOpen: false,
             editIndex: null,
 
@@ -974,7 +975,11 @@ function nuevoClienteComponent() {
                         setTimeout(() => {
                             this.success = false;
                             clienteModalOpen = false;
-                            window.location.reload();
+                            if (this.redirectUrl) {
+                                window.location.href = this.redirectUrl;
+                            } else {
+                                window.location.reload();
+                            }
                         }, 1500);
                     } else if (res.status === 422 && data.errors) {
                         this.fieldErrors = data.errors;

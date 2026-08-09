@@ -25,6 +25,7 @@ class VentaController extends Controller
                 'user:id,name',
                 'ventaProductos.producto:id,nombre,precio',
             ])
+            ->where('user_id', auth()->id())
             ->select(['id', 'cliente_id', 'mascota_id', 'user_id', 'metodo_pago', 'estado', 'total', 'created_at'])
             ->latest();
 
@@ -53,8 +54,10 @@ class VentaController extends Controller
         // KPIs del encabezado
         $hoy     = now()->toDateString();
         $kpisHoy = Venta::selectRaw('COUNT(*) as count, COALESCE(SUM(total), 0) as sum')
+                        ->where('user_id', auth()->id())
                         ->whereDate('created_at', $hoy)->first();
         $kpisMes = Venta::selectRaw('COUNT(*) as count, COALESCE(SUM(total), 0) as sum')
+                        ->where('user_id', auth()->id())
                         ->whereMonth('created_at', now()->month)
                         ->whereYear('created_at', now()->year)->first();
 
@@ -91,7 +94,7 @@ class VentaController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'cliente_id'                    => ['required', 'exists:clientes,id'],
+            'cliente_id'                    => ['nullable', 'exists:clientes,id'],
             'mascota_id'                    => ['nullable', 'exists:mascotas,id'],
             'metodo_pago'                   => ['required', 'string', 'max:100'],
             'total'                         => ['required', 'numeric', 'min:0'],
@@ -105,11 +108,11 @@ class VentaController extends Controller
 
         try {
             $venta = Venta::create([
-                'cliente_id'  => $data['cliente_id'],
+                'cliente_id'  => $data['cliente_id'] ?? null,
                 'mascota_id'  => $data['mascota_id'] ?? null,
                 'user_id'     => Auth::id(),
                 'metodo_pago' => $data['metodo_pago'],
-                'estado'      => 'completada',
+                'estado'      => 'pagada',
                 'total'       => $data['total'],
             ]);
 
@@ -279,7 +282,7 @@ class VentaController extends Controller
     public function update(Request $request, Venta $venta)
     {
         $data = $request->validate([
-            'estado'      => ['required', 'string', 'in:pendiente,completada,cancelada'],
+            'estado'      => ['required', 'string', 'in:pendiente,pagada,cancelada'],
             'metodo_pago' => ['required', 'string', 'max:100'],
         ]);
 

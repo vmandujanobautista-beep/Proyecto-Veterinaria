@@ -24,13 +24,25 @@ class DashboardController extends Controller
             Cita::whereDate('fecha', $hoy)->count()
         );
 
-        $ventasHoy = Cache::remember("dashboard_ventas_hoy_{$hoy}", 60, fn () =>
-            Venta::whereDate('created_at', $hoy)->sum('total')
+        $userId = auth()->id();
+
+        $ventasHoy = Cache::remember("dashboard_ventas_hoy_{$userId}_{$hoy}", 60, fn () =>
+            Venta::where('user_id', $userId)->whereDate('created_at', $hoy)->sum('total')
         );
 
         // Mascotas se obtiene via relación; se puede cachear si el modelo existe
         $totalMascotas = Cache::remember('dashboard_total_mascotas', 60, fn () =>
             \App\Models\Mascota::count()
+        );
+
+        $mesActual = now()->format('Y-m');
+
+        $clientesEsteMes = Cache::remember("dashboard_clientes_mes_{$mesActual}", 60, fn () =>
+            Cliente::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count()
+        );
+
+        $mascotasEsteMes = Cache::remember("dashboard_mascotas_mes_{$mesActual}", 60, fn () =>
+            \App\Models\Mascota::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count()
         );
 
         // ── Próximas citas (hoy en adelante) — eager loading para evitar N+1 ──
@@ -52,7 +64,9 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'totalClientes',
+            'clientesEsteMes',
             'totalMascotas',
+            'mascotasEsteMes',
             'citasHoy',
             'ventasHoy',
             'proximasCitas',

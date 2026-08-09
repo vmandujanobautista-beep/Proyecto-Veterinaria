@@ -18,7 +18,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
-                <span class="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full font-medium">+5 este mes</span>
+                <span class="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full font-medium">+{{ $clientesEsteMes ?? 0 }} este mes</span>
             </div>
             <p class="text-3xl font-bold text-slate-800">{{ $totalClientes ?? 0 }}</p>
             <p class="text-sm text-slate-500 mt-1">Clientes Registrados</p>
@@ -38,7 +38,7 @@
                     <path d="M12 11.5c-2.5 0-4.5 1.5-5.5 3.5-.5 1-1 2-1 3.5 0 2.5 2.5 4.5 6.5 4.5s6.5-2 6.5-4.5c0-1.5-.5-2.5-1-3.5-1-2-3-3.5-5.5-3.5z"/>
                     </svg>
                 </div>
-                <span class="text-xs text-sky-600 bg-sky-50 px-2 py-1 rounded-full font-medium">+12 este mes</span>
+                <span class="text-xs text-sky-600 bg-sky-50 px-2 py-1 rounded-full font-medium">+{{ $mascotasEsteMes ?? 0 }} este mes</span>
             </div>
             <p class="text-3xl font-bold text-slate-800">{{ $totalMascotas ?? 0 }}</p>
             <p class="text-sm text-slate-500 mt-1">Mascotas Registradas</p>
@@ -91,7 +91,7 @@
             </div>
             <div class="divide-y divide-slate-50">
                 @forelse($proximasCitas ?? [] as $cita)
-                    <div class="flex items-center gap-4 px-6 py-3 hover:bg-slate-50 transition-colors">
+                    <div @click="$dispatch('ver-cita', { id: {{ $cita->id }} })" class="flex items-center gap-4 px-6 py-3 hover:bg-slate-50 transition-colors cursor-pointer">
                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                             {{ strtoupper(substr($cita->mascota->nombre ?? 'M', 0, 1)) }}
                         </div>
@@ -126,8 +126,8 @@
                 Acciones Rápidas
             </h3>
             <div class="space-y-3">
-                <a href="{{ route('clientes.create') }}"
-                   class="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors group">
+                <button type="button" @click="$dispatch('nuevo-cliente', { redirect: '{{ route('clientes.index') }}' })"
+                   class="w-full text-left flex items-center gap-3 p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors group">
                     <div class="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -137,24 +137,11 @@
                         <p class="text-sm font-medium text-emerald-800">Nuevo Cliente</p>
                         <p class="text-xs text-emerald-600">Registrar propietario</p>
                     </div>
-                </a>
+                </button>
 
-                <a href="{{ route('mascotas.create') }}"
-                   class="flex items-center gap-3 p-3 rounded-xl bg-sky-50 hover:bg-sky-100 transition-colors group">
-                    <div class="w-9 h-9 rounded-lg bg-sky-500 flex items-center justify-center flex-shrink-0 text-lg">
-                       <!-- 🐾-->
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-sky-800">Nueva Mascota</p>
-                        <p class="text-xs text-sky-600">Registrar paciente</p>
-                    </div>
-                </a>
 
-                <a href="{{ route('citas.create') }}"
-                   class="flex items-center gap-3 p-3 rounded-xl bg-violet-50 hover:bg-violet-100 transition-colors group">
+                <button type="button" @click="$dispatch('agendar-cita', { redirect: '{{ route('citas.index') }}' })"
+                   class="w-full text-left flex items-center gap-3 p-3 rounded-xl bg-violet-50 hover:bg-violet-100 transition-colors group">
                     <div class="w-9 h-9 rounded-lg bg-violet-500 flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -164,10 +151,10 @@
                         <p class="text-sm font-medium text-violet-800">Nueva Cita</p>
                         <p class="text-xs text-violet-600">Agendar consulta</p>
                     </div>
-                </a>
+                </button>
 
                 <a href="{{ route('ventas.create') }}"
-                   class="flex items-center gap-3 p-3 rounded-xl bg-amber-50 hover:bg-amber-100 transition-colors group">
+                   class="w-full text-left flex items-center gap-3 p-3 rounded-xl bg-amber-50 hover:bg-amber-100 transition-colors group">
                     <div class="w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -206,7 +193,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-50">
                     @forelse($ultimosClientes ?? [] as $cliente)
-                        <tr class="hover:bg-slate-50 transition-colors">
+                        <tr class="hover:bg-slate-50 transition-colors cursor-pointer" @click="$dispatch('ver-cliente', { id: {{ $cliente->id }} })">
                             <td class="px-6 py-3">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
@@ -226,8 +213,8 @@
                             </td>
                             <td class="px-6 py-3 text-slate-500 text-xs">{{ $cliente->created_at->format('d/m/Y') }}</td>
                             <td class="px-6 py-3">
-                                <a href="{{ route('clientes.show', $cliente) }}"
-                                   class="text-xs text-sky-600 hover:text-sky-800 font-medium">Ver →</a>
+                                <button type="button" @click.stop="$dispatch('ver-cliente', { id: {{ $cliente->id }} })"
+                                   class="text-xs text-sky-600 hover:text-sky-800 font-medium">Ver →</button>
                             </td>
                         </tr>
                     @empty
@@ -240,6 +227,4 @@
                 </tbody>
             </table>
         </div>
-    </div>
-
 </x-app-layout>

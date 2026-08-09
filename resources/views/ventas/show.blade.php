@@ -18,14 +18,14 @@
     </x-slot>
 
     @php
-        $estadoConfig = match($venta->estado ?? 'completada') {
-            'completada' => ['class' => 'bg-emerald-100 text-emerald-700 border-emerald-200', 'label' => 'Completada', 'emoji' => '✅'],
+        $estadoConfig = match($venta->estado ?? 'pagada') {
+            'pagada' => ['class' => 'bg-emerald-100 text-emerald-700 border-emerald-200', 'label' => 'Pagada', 'emoji' => '✅'],
             'pendiente'  => ['class' => 'bg-amber-100 text-amber-700 border-amber-200',       'label' => 'Pendiente',  'emoji' => '⏳'],
             'cancelada'  => ['class' => 'bg-rose-100 text-rose-700 border-rose-200',          'label' => 'Cancelada',  'emoji' => '❌'],
             default      => ['class' => 'bg-slate-100 text-slate-600 border-slate-200',       'label' => ucfirst($venta->estado ?? ''), 'emoji' => '🧾'],
         };
-        $metodoPagoEmoji = match($venta->metodo_pago) {
-            'Efectivo' => '💵', 'Tarjeta' => '💳', 'Transferencia' => '🏦', default => '💰',
+        $metodoPagoEmoji = match(strtolower($venta->metodo_pago ?? '')) {
+            'efectivo' => '💵', 'tarjeta' => '💳', 'transferencia' => '🏦', default => '💰',
         };
     @endphp
 
@@ -106,7 +106,7 @@
                     <div class="flex items-center gap-2">
                         <span class="text-xl">{{ $metodoPagoEmoji }}</span>
                         <div>
-                            <p class="text-sm font-semibold text-slate-800">{{ $venta->metodo_pago ?? 'No especificado' }}</p>
+                            <p class="text-sm font-semibold text-slate-800">{{ ucfirst($venta->metodo_pago ?? 'No especificado') }}</p>
                             @if($venta->user)
                                 <p class="text-xs text-slate-500">Por: {{ $venta->user->name }}</p>
                             @endif

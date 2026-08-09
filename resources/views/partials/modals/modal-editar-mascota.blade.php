@@ -14,7 +14,7 @@
     x-transition:leave-end="opacity-0"
     class="fixed inset-0 z-[80] flex items-center justify-center p-4"
     @keydown.escape.window="editarMascotaModalOpen = false"
-    @editar-mascota.window="cargarMascota($event.detail.id)"
+    @editar-mascota.window="cargarMascota($event.detail.id); redirectUrl = $event.detail?.redirect || null;"
 >
     {{-- Backdrop --}}
     <div class="absolute inset-0 bg-black/60" style="backdrop-filter:blur(4px);" @click="editarMascotaModalOpen = false"></div>
@@ -170,6 +170,7 @@
 function editarMascotaComponent() {
     return {
         editarMascotaModalOpen: false,
+        redirectUrl: null,
         isSubmitting: false,
         globalError: null,
         mascotaId: null,
@@ -252,8 +253,12 @@ function editarMascotaComponent() {
 
                 if (response.ok && data.success) {
                     this.editarMascotaModalOpen = false;
-                    // Recargar la página para reflejar cambios en tiempo real
-                    window.location.reload();
+                    if (this.redirectUrl) {
+                        window.location.href = this.redirectUrl;
+                    } else {
+                        // Recargar la página para reflejar cambios en tiempo real
+                        window.location.reload();
+                    }
                 } else {
                     this.globalError = data.message || 'Error al guardar los cambios.';
                     if(data.errors) {

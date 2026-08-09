@@ -41,10 +41,9 @@
         #pos-toast { transition: opacity .4s ease, transform .4s ease; }
 
         /* ── Scroll carrito ── */
-        #carrito-lista { max-height: calc(100vh - 480px); min-height: 120px; overflow-y: auto; }
-        #carrito-lista::-webkit-scrollbar { width: 4px; }
-        #carrito-lista::-webkit-scrollbar-track { background: #f1f5f9; }
-        #carrito-lista::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .ticket-scroll::-webkit-scrollbar { width: 4px; }
+        .ticket-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .ticket-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 
     <x-slot name="header">
@@ -213,10 +212,10 @@
 
         {{-- ══════════ COLUMNA DERECHA: Carrito (40%) ══════════ --}}
         <div class="w-[420px] flex-shrink-0 sticky top-4">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col" style="max-height: calc(100vh - 2rem);">
 
                 {{-- Header carrito --}}
-                <div class="bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-4">
+                <div class="bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-4 flex-shrink-0">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2 text-white">
                             <span class="text-xl">🧾</span>
@@ -234,7 +233,7 @@
                     </div>
                 </div>
 
-                <div class="p-4 space-y-4">
+                <div class="p-4 space-y-4 overflow-y-auto ticket-scroll flex-1">
 
                     {{-- Aviso stock bajo --}}
                     <div x-show="avisoStockBajo"
@@ -243,8 +242,14 @@
                         ⚠️ <span x-text="avisoStockBajo"></span>
                     </div>
 
+                    {{-- Venta Rápida Toggle --}}
+                    <label class="flex items-center gap-2 cursor-pointer bg-slate-50 p-3 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors">
+                        <input type="checkbox" x-model="ventaRapida" class="w-5 h-5 text-emerald-600 rounded-lg focus:ring-emerald-500 border-slate-300">
+                        <span class="text-sm font-semibold text-slate-700">⚡ Venta Rápida (Público General)</span>
+                    </label>
+
                     {{-- Selector de Cliente --}}
-                    <div>
+                    <div x-show="!ventaRapida" x-transition>
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
                             Cliente <span class="text-rose-500">*</span>
                         </label>
@@ -270,7 +275,7 @@
                     </div>
 
                     {{-- Selector de Mascota --}}
-                    <div>
+                    <div x-show="!ventaRapida" x-transition>
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
                             Mascota <span class="text-rose-500">*</span>
                         </label>
@@ -396,7 +401,7 @@
                     <button type="button"
                             id="btn-cobrar"
                             @click="procesarVenta()"
-                            :disabled="cobrando || carrito.length === 0 || !clienteId || !mascotaId || !metodoPago || (metodoPago === 'Efectivo' && cambio < 0)"
+                            :disabled="cobrando || carrito.length === 0 || (!ventaRapida && (!clienteId || !mascotaId)) || !metodoPago || (metodoPago === 'Efectivo' && cambio < 0)"
                             class="btn-cobrar w-full py-3.5 text-base font-bold flex items-center justify-center gap-2">
                         <template x-if="!cobrando">
                             <span>✅ COBRAR <span x-text="carrito.length > 0 ? '— $' + formatMoney(totalCarrito) : ''"></span></span>
@@ -433,6 +438,7 @@
             avisoTimer: null,
 
             // Venta
+            ventaRapida: false,
             clienteId: '',
             mascotaId: '',
             mascotas: [],
@@ -529,7 +535,9 @@
                 this.mascotas = [];
                 this.metodoPago = '';
                 this.montoRecibido = '';
+                this.ventaRapida = false;
             },
+
 
             mostrarAvisoStock(nombre, restante) {
                 clearTimeout(this.avisoTimer);
@@ -559,16 +567,16 @@
 
             async procesarVenta() {
                 if (this.carrito.length === 0) return this.toast('Agrega al menos un producto al carrito.', false);
-                if (!this.clienteId)  return this.toast('Selecciona un cliente.', false);
-                if (!this.mascotaId)  return this.toast('Selecciona una mascota.', false);
+                if (!this.ventaRapida && !this.clienteId) return this.toast('Selecciona un cliente.', false);
+                if (!this.ventaRapida && !this.mascotaId) return this.toast('Selecciona una mascota.', false);
                 if (!this.metodoPago) return this.toast('Selecciona el método de pago.', false);
                 if (this.metodoPago === 'Efectivo' && this.cambio < 0) return this.toast('El monto recibido es insuficiente.', false);
 
                 this.cobrando = true;
 
                 const payload = {
-                    cliente_id:  this.clienteId,
-                    mascota_id:  this.mascotaId,
+                    cliente_id:  this.ventaRapida ? null : this.clienteId,
+                    mascota_id:  this.ventaRapida ? null : this.mascotaId,
                     metodo_pago: this.metodoPago,
                     total:       this.totalCarrito,
                     productos: this.carrito.map(i => ({
@@ -635,5 +643,33 @@
             },
         };
     }
+
+    // Interceptar cualquier enlace de navegación (menú lateral, botón atrás, etc.)
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        
+        // Verificamos que sea un enlace válido, que no sea la página actual y que no sea un enlace vacío/hash (#)
+        if (link && link.href && !link.href.includes('#') && !link.href.startsWith('javascript:')) {
+            // Verificamos si estamos saliendo de esta URL
+            if (link.href !== window.location.href) {
+                e.preventDefault();
+                const pass = prompt('Para salir de la Venta Actual, ingresa la contraseña de Admin:');
+                
+                if (pass === 'PASSWORD') {
+                    window.location.href = link.href;
+                } else if (pass !== null) {
+                    alert('Contraseña incorrecta');
+                }
+            }
+        }
+    });
+
+    // Interceptar el cierre del navegador o pestaña, o recarga (F5)
+    // Nota: Por seguridad, los navegadores modernos no permiten mostrar un 'prompt' de contraseña aquí, 
+    // solo muestran su mensaje genérico de confirmación ("¿Seguro que quieres salir?").
+    window.addEventListener('beforeunload', function(e) {
+        e.preventDefault();
+        e.returnValue = ''; // Muestra el mensaje nativo del navegador
+    });
     </script>
 </x-app-layout>

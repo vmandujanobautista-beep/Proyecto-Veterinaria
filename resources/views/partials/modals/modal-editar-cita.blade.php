@@ -190,6 +190,7 @@
                                name="fecha"
                                required
                                x-model="form.fecha"
+                               @change="actualizarHorario()"
                                class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 bg-slate-50 rounded-xl
                                       focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
                                       hover:border-slate-300 transition-all">
@@ -198,19 +199,23 @@
                 <div>
                     <label for="edit-hora" class="block text-sm font-semibold text-slate-700 mb-1.5">
                         Hora <span class="text-rose-500">*</span>
+                        <span class="text-slate-400 font-normal" x-text="`(${minHora} – ${maxHora})`"></span>
                     </label>
                     <div class="relative">
                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <input type="time"
-                               id="edit-hora"
+                        <select id="edit-hora"
                                name="hora"
                                required
                                x-model="form.hora"
                                class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 bg-slate-50 rounded-xl
                                       focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
-                                      hover:border-slate-300 transition-all">
+                                      hover:border-slate-300 appearance-none transition-all">
+                            <template x-for="opcion in opcionesHora" :key="opcion">
+                                <option :value="opcion" x-text="opcion"></option>
+                            </template>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -359,6 +364,9 @@ function editarCitaModal() {
         clienteSeleccionado: '',
         mascotaSeleccionada: '',
         mascotaPlaceholder: '— Primero selecciona un cliente —',
+        minHora: '08:00',
+        maxHora: '20:00',
+        opcionesHora: [],
         form: {
             fecha: '',
             hora: '',
@@ -392,7 +400,10 @@ function editarCitaModal() {
                 // Rellenar formulario
                 const fecha = data.cita.fecha ? data.cita.fecha.split('T')[0] : '';
                 this.form.fecha           = fecha;
-                this.form.hora            = data.cita.hora || '';
+                this.form.hora            = data.cita.hora ? data.cita.hora.substring(0,5) : '';
+                
+                this.actualizarHorario();
+
                 this.form.tipo_servicio   = data.cita.tipo_servicio || '';
                 this.form.estado          = data.cita.estado || 'pendiente';
                 this.form.motivo          = data.cita.motivo || '';
@@ -425,11 +436,14 @@ function editarCitaModal() {
             this.mascotaSeleccionada = '';
             this.mascotas = [];
             this.mascotaPlaceholder = '— Primero selecciona un cliente —';
+            this.minHora = '08:00';
+            this.maxHora = '20:00';
             this.form = {
                 fecha: '', hora: '', tipo_servicio: '',
                 estado: 'pendiente', motivo: '',
                 enviado_email: false, enviado_whatsapp: false
             };
+            this.generarOpcionesHora();
         },
 
         async cargarClientes() {
@@ -493,6 +507,47 @@ function editarCitaModal() {
 
             document.body.appendChild(form);
             form.submit();
+        },
+
+        actualizarHorario() {
+            if (!this.form.fecha) {
+                this.minHora = '08:00';
+                this.maxHora = '20:00';
+                this.generarOpcionesHora();
+                return;
+            }
+            const parts = this.form.fecha.split('-');
+            if (parts.length !== 3) return;
+            const date = new Date(parts[0], parts[1] - 1, parts[2]);
+            const day = date.getDay(); // 0 = Domingo
+            
+            if (day === 0) {
+                this.minHora = '10:00';
+                this.maxHora = '18:00';
+            } else {
+                this.minHora = '08:00';
+                this.maxHora = '20:00';
+            }
+            this.generarOpcionesHora();
+        },
+
+        generarOpcionesHora() {
+            this.opcionesHora = [];
+            let [minH, minM] = this.minHora.split(':').map(Number);
+            let [maxH, maxM] = this.maxHora.split(':').map(Number);
+            
+            let current = new Date(2000, 0, 1, minH, minM, 0);
+            let end = new Date(2000, 0, 1, maxH, maxM, 0);
+            
+            while (current <= end) {
+                let h = current.getHours().toString().padStart(2, '0');
+                let m = current.getMinutes().toString().padStart(2, '0');
+                this.opcionesHora.push(`${h}:${m}`);
+                current.setMinutes(current.getMinutes() + 30);
+            }
+            if (!this.opcionesHora.includes(this.form.hora)) {
+                this.form.hora = this.opcionesHora.length > 0 ? this.opcionesHora[0] : '';
+            }
         }
     };
 }

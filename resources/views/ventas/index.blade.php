@@ -118,7 +118,7 @@
                     <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 flex-1">
                         <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Estado</p>
                         <span class="inline-block text-xs font-semibold px-2.5 py-1 rounded-full"
-                              :class="venta?.estado === 'completada' ? 'bg-emerald-100 text-emerald-700' :
+                              :class="venta?.estado === 'pagada' ? 'bg-emerald-100 text-emerald-700' :
                                       venta?.estado === 'cancelada'  ? 'bg-rose-100 text-rose-700' :
                                       'bg-amber-100 text-amber-700'"
                               x-text="venta?.estado ? venta.estado.charAt(0).toUpperCase() + venta.estado.slice(1) : '—'"></span>
@@ -295,11 +295,11 @@
                     @forelse($ventas as $venta)
                         @php
                             $folio = 'VNT-' . str_pad($venta->id, 3, '0', STR_PAD_LEFT);
-                            $metodoPagoEmoji = match($venta->metodo_pago) {
-                                'Efectivo' => '💵', 'Tarjeta' => '💳', 'Transferencia' => '🏦', default => '💰',
+                            $metodoPagoEmoji = match(strtolower($venta->metodo_pago ?? '')) {
+                                'efectivo' => '💵', 'tarjeta' => '💳', 'transferencia' => '🏦', default => '💰',
                             };
-                            $estadoConfig = match($venta->estado ?? 'completada') {
-                                'completada' => ['class' => 'bg-emerald-100 text-emerald-700', 'label' => 'Completada'],
+                            $estadoConfig = match($venta->estado ?? 'pagada') {
+                                'pagada' => ['class' => 'bg-emerald-100 text-emerald-700', 'label' => 'Pagada'],
                                 'pendiente'  => ['class' => 'bg-amber-100 text-amber-700',    'label' => 'Pendiente'],
                                 'cancelada'  => ['class' => 'bg-rose-100 text-rose-700',      'label' => 'Cancelada'],
                                 default      => ['class' => 'bg-slate-100 text-slate-600',    'label' => ucfirst($venta->estado ?? '')],
@@ -338,8 +338,10 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 hidden md:table-cell">
-                                <span class="text-sm">{{ $metodoPagoEmoji }}</span>
-                                <span class="text-xs text-slate-600 ml-1">{{ $venta->metodo_pago ?? '—' }}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-base leading-none">{{ $metodoPagoEmoji }}</span>
+                                    <span class="text-sm text-slate-600 font-medium">{{ ucfirst($venta->metodo_pago ?? '—') }}</span>
+                                </div>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <span class="font-bold text-slate-800">${{ number_format($venta->total, 2) }}</span>
@@ -358,30 +360,22 @@
                                     <button type="button"
                                             title="Ver detalle"
                                             @click="$dispatch('ver-venta', { id: {{ $venta->id }} })"
-                                            class="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            class="group/btn-eye p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
+                                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <!-- Pupil -->
+                                            <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"
+                                                class="transition-transform duration-150 ease-out origin-center group-hover/btn-eye:scale-75" />
+                                            <!-- Eye shape -->
+                                            <path
+                                                d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"
+                                                class="transition-transform duration-150 ease-out origin-center group-hover/btn-eye:scale-y-90" />
                                         </svg>
                                     </button>
 
-                                    {{-- Cancelar Venta --}}
-                                    @if($venta->estado !== 'cancelada')
-                                        <button type="button"
-                                                title="Cancelar venta"
-                                                @click="$dispatch('cancelar-venta', { id: {{ $venta->id }}, folio: '{{ $folio }}' })"
-                                                class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-                                            </svg>
-                                        </button>
-                                    @else
-                                        <span class="p-1.5 text-slate-200 cursor-not-allowed rounded-lg" title="Ya cancelada">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-                                            </svg>
-                                        </span>
-                                    @endif
+
                                 </div>
                             </td>
                         </tr>
@@ -415,7 +409,7 @@
 
         @if($ventas->hasPages())
             <div class="px-6 py-4 border-t border-slate-100 min-h-[72px]">
-                {{ $ventas->links() }}
+                {{ $ventas->links('vendor.pagination.uiverse-fuego') }}
             </div>
         @endif
     </div>

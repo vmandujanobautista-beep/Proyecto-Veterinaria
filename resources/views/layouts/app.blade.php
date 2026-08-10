@@ -131,167 +131,352 @@
             70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
             100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
         }
+        
+        .group:hover .home-roof {
+            animation: home-roof 0.4s ease-out forwards;
+        }
+        .group:hover .home-house {
+            animation: home-house 0.3s ease-out forwards;
+        }
+        .group:hover .home-door {
+            animation: home-door 0.3s ease-out forwards;
+            animation-delay: 0.3s;
+        }
+        @keyframes home-roof {
+            0% { transform: translateY(-2px); opacity: 0.6; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes home-house {
+            0% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+        @keyframes home-door {
+            0% { transform: scaleY(0); }
+            100% { transform: scaleY(1); }
+        }
+        
+        .user-center, .user-left, .user-right {
+            transition: all 0.25s ease-in-out;
+            transform-origin: center center;
+            transform-box: fill-box;
+        }
+        .group:hover .user-center {
+            animation: user-center-anim 0.25s ease-out forwards;
+        }
+        .group:hover .user-left {
+            animation: user-left-anim 0.3s ease-out forwards;
+            animation-delay: 0.05s;
+        }
+        .group:hover .user-right {
+            animation: user-right-anim 0.3s ease-out forwards;
+            animation-delay: 0.05s;
+        }
+        @keyframes user-center-anim {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-2px) scale(1.05); }
+        }
+        @keyframes user-left-anim {
+            0% { transform: translateX(0) scale(1); }
+            100% { transform: translateX(-1px) scale(1.02); }
+        }
+        @keyframes user-right-anim {
+            0% { transform: translateX(0) scale(1); }
+            100% { transform: translateX(1px) scale(1.02); }
+        }
+        
+        @keyframes paw-anim {
+            0% { opacity: 0; transform: translateY(-20px) scale(1.5); }
+            15% { opacity: 1; transform: translateY(0) scale(1); }
+            25% { transform: translateY(-1px) scale(0.75); }
+            35% { transform: translateY(0) scale(1.1); }
+            45% { transform: translateY(0) scale(1); }
+            100% { opacity: 0.6; transform: translateY(0) scale(1.03); }
+        }
+        .paw-inner {
+            transition: all 0.3s;
+            transform-origin: center;
+            transform-box: fill-box;
+        }
+        .group:hover .paw-inner {
+            animation: paw-anim 0.95s forwards;
+        }
+
+        @keyframes cart-upper-anim {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(4px); }
+        }
+        @keyframes cart-wheel-anim {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            50% { transform: translateX(4px) rotate(180deg); }
+        }
+        @keyframes cart-item-anim {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+        }
+        .cart-wheel {
+            transform-origin: center center;
+            transform-box: fill-box;
+        }
+        .group:hover .cart-upper {
+            animation: cart-upper-anim 0.6s ease-in-out forwards;
+        }
+        .group:hover .cart-wheel {
+            animation: cart-wheel-anim 0.6s ease-in-out forwards;
+        }
+        .group:hover .cart-item {
+            animation: cart-item-anim 0.4s ease-in-out forwards;
+        }
+
+        .clock-hands {
+            transform-origin: center;
+            transform-box: fill-box;
+            transition: transform 1s ease-in-out;
+        }
+        .group:hover .clock-hands {
+            transform: rotate(360deg);
+        }
+
+        @keyframes star-outline-anim {
+            0% { transform: scale(1) rotate(0deg); }
+            33% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1.1) rotate(0deg); }
+            66% { transform: scale(1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .star-outline {
+            transform-origin: center;
+            transform-box: fill-box;
+            transition: all 0.3s ease-in-out;
+        }
+        .group:hover .star-outline {
+            animation: star-outline-anim 0.5s ease-in-out;
+        }
+        .star-fill {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s ease-out;
+            transform-origin: center;
+            transform-box: fill-box;
+        }
+        .group:hover .star-fill {
+            opacity: 1;
+            transform: scale(1);
+            transition: all 0.4s ease-out;
+        }
+
+        .sidebar-arrow {
+            transition: transform 0.3s ease-out;
+        }
+        .group:hover .sidebar-arrow {
+            transform: translateX(4px);
+        }
+        .sidebar-dash {
+            transition: all 0.3s ease-out;
+            transform-origin: 4px 12px;
+        .group:hover .sidebar-dash {
+            transform: scale(1.2);
+            opacity: 0.7;
+        }
+
+        /* Transiciones Swup */
+        .transition-main {
+            transition: opacity 200ms ease-out, transform 200ms ease-out;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        html.is-animating .transition-main {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .transition-main {
+                transition: opacity 200ms ease-out;
+            }
+            html.is-animating .transition-main {
+                transform: none;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-100 antialiased">
 
 {{-- Alpine scope global: profileOpen controla el modal de perfil, pageLoading el loader --}}
 <div class="flex h-screen overflow-hidden"
-     x-data="{ profileOpen: false, clienteModalOpen: false, pageLoading: false }"
+     x-data="{ 
+        sidebarOpen: JSON.parse(localStorage.getItem('sidebarOpen') ?? 'true'),
+        profileOpen: false, 
+        clienteModalOpen: false, 
+        pageLoading: false 
+     }"
+     x-init="$watch('sidebarOpen', val => localStorage.setItem('sidebarOpen', val))"
      @show-loader.window="pageLoading = true; setTimeout(() => { pageLoading = false }, 8000);"
      @hide-loader.window="pageLoading = false"
      @loading.window="$event.detail ? (pageLoading = true, setTimeout(() => { pageLoading = false }, 8000)) : (pageLoading = false)">
 
     <!-- ===== SIDEBAR ===== -->
-    <aside id="sidebar" class="vet-sidebar w-72 flex-shrink-0 flex flex-col transition-all duration-300 z-40">
-<!-- Logo / Brand -->
-<!-- Agregamos justify-between aquí para separar los extremos -->
-<div class="flex items-center justify-between px-6 py-5 border-b border-white/10 w-full">
-    
-    <!-- Lado Izquierdo: Agrupamos el Icono de Usuario y el Texto -->
-    <div class="flex items-center gap-3">
-        
-        <!-- Contenedor del Icono de Usuario -->
-        <div class="w-12 h-12 bg-[#0c3859] rounded-full flex items-center justify-center shrink-0">
-            <!-- El SVG del usuario (solo uno) -->
-            <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-            </svg>
+    <aside id="sidebar" :class="sidebarOpen ? 'w-72' : 'w-[72px]'" class="vet-sidebar flex-shrink-0 flex flex-col transition-all duration-300 z-40">
+        <!-- Logo / Brand -->
+        <!-- Cambiamos la disposición si está colapsado -->
+        <div class="flex items-center py-5 border-b border-white/10 w-full transition-all duration-300" :class="sidebarOpen ? 'justify-between px-6' : 'justify-center px-2 flex-col gap-3'">
+            
+            <!-- Lado Izquierdo: Agrupamos el Icono de Usuario y el Texto -->
+            <div class="flex items-center gap-3">
+                
+                <!-- Contenedor del Icono de Usuario -->
+                <div class="w-12 h-12 bg-[#0c3859] rounded-full flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                
+                <!-- Textos -->
+                <div class="whitespace-nowrap overflow-hidden transition-all duration-300" :class="sidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 hidden'">
+                    <h1 class="text-white text-xl font-bold leading-tight">VetCare</h1>
+                    <p class="text-sky-300 text-sm leading-tight">Gestión Veterinaria</p>
+                </div>
+            </div>
+            
+            <!-- Lado Derecho: Botón de colapsar -->      
+            <div class="flex items-center" :class="sidebarOpen ? '-mr-2' : ''">
+                <button type="button"
+                   @click="sidebarOpen = !sidebarOpen"
+                   class="p-2 text-sky-400 rounded-lg hover:bg-[#1a5582] hover:text-white transition-colors duration-200 group"
+                   :title="sidebarOpen ? 'Colapsar menú' : 'Expandir menú'">
+                    <svg class="w-6 h-6 transition-transform duration-300" :class="sidebarOpen ? 'rotate-180' : ''" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path class="sidebar-arrow" d="M11 9a1 1 0 0 0 1-1V5.061a1 1 0 0 1 1.811-.75l6.836 6.836a1.207 1.207 0 0 1 0 1.707l-6.836 6.835a1 1 0 0 1-1.811-.75V16a1 1 0 0 0-1-1H9a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z" />
+                        <path class="sidebar-dash" d="M4 9v6" />
+                    </svg>
+                </button>
+            </div>
         </div>
-        
-        <!-- Textos -->
-        <div class="whitespace-nowrap">
-            <h1 class="text-white text-xl font-bold leading-tight">VetCare</h1>
-            <p class="text-sky-300 text-sm leading-tight">Gestión Veterinaria</p>
-        </div>
-
-    </div>
-    
-    <!-- Lado Derecho: Nuevo botón de perfil en forma de tuerca -->      
-    <!-- Al estar dentro de un contenedor justify-between, esto se empuja solo a la derecha -->
-    <!-- Puedes quitar el -mr-6, o dejarlo como -mr-2 si quieres que pegue aún más al borde -->
-    <button type="button"
-       @click="profileOpen = true"
-       class="p-2 text-sky-400 rounded-lg hover:bg-[#1a5582] hover:text-white transition-colors duration-200 -mr-2 group"
-       title="Mi Perfil">
-        <!-- Icono de Tuerca (Engranaje) SVG Animado -->
-        <svg class="w-6 h-6" 
-             xmlns="http://www.w3.org/2000/svg" 
-             viewBox="0 0 32 32" 
-             fill="none" 
-             stroke="currentColor" 
-             stroke-width="2" 
-             stroke-linecap="square" 
-             stroke-linejoin="miter" 
-             stroke-miterlimit="10"
-             style="overflow: visible;">
-            <style>
-                @keyframes gear-rotate {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                @keyframes gear-scale-center {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.1); }
-                }
-                @keyframes gear-scale-body {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.02); }
-                }
-                .group:hover .gear-rotator {
-                    animation: gear-rotate 0.9s ease-in-out;
-                }
-                .group:hover .gear-center {
-                    animation: gear-scale-center 0.3s ease-out;
-                }
-                .group:hover .gear-body {
-                    animation: gear-scale-body 0.6s ease-in-out;
-                }
-                .gear-rotator, .gear-center, .gear-body {
-                    transform-origin: 50% 50%;
-                    transform-box: fill-box;
-                }
-            </style>
-            <g class="gear-rotator">
-                <circle class="gear-center" cx="16" cy="16" r="5" />
-                <path class="gear-body" d="m30,17.5v-3l-3.388-1.355c-.25-.933-.617-1.815-1.089-2.633l1.436-3.351-2.121-2.121-3.351,1.436c-.817-.472-1.7-.838-2.633-1.089l-1.355-3.388h-3l-1.355,3.388c-.933.25-1.815.617-2.633,1.089l-3.351-1.436-2.121,2.121 1.436,3.351c-.472.817-.838,1.7-1.089,2.633l-3.388,1.355v3l3.388,1.355c.25.933.617,1.815,1.089,2.633l-1.436,3.351 2.121,2.121 3.351-1.436c.817.472 1.7.838 2.633,1.089l1.355,3.388h3l1.355-3.388c.933-.25 1.815-.617 2.633-1.089l3.351,1.436 2.121-2.121-1.436-3.351c.472-.817.838-1.7 1.089-2.633l3.388-1.355Z" />
-            </g>
-        </svg>
-    </button>
-</div>
-
 
         <!-- Navigation -->
-        <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+        <nav class="flex-1 py-5 space-y-1 overflow-y-auto" :class="sidebarOpen ? 'px-3' : 'px-2'">
 
-            <p class="text-sky-400/60 text-xs font-semibold uppercase tracking-wider px-3 mb-2">Principal</p>
+            <p x-show="sidebarOpen" class="text-sky-400/60 text-xs font-semibold uppercase tracking-wider px-3 mb-2 transition-all">Principal</p>
 
             <a href="{{ route('dashboard') }}"
-               class="nav-link-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('dashboard') ? 'nav-item-active text-white' : '' }}">
-                <svg class="w-5 h-5 text-sky-400 group-hover:text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+               :title="!sidebarOpen ? 'Dashboard' : ''"
+               class="nav-link-item flex items-center py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('dashboard') ? 'nav-item-active text-white' : '' }}"
+               :class="sidebarOpen ? 'px-3 gap-3' : 'justify-center px-0'">
+                <svg class="w-5 h-5 text-sky-400 group-hover:text-sky-300 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path class="home-roof transition-all duration-200" d="M5 12l-2 0l9 -9l9 9l-2 0" />
+                    <path class="home-house transition-all duration-200" style="transform-origin: center;" d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+                    <path class="home-door transition-all duration-200" style="transform-origin: center bottom;" d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
                 </svg>
-                <span class="text-sm font-medium">Dashboard</span>
+                <span x-show="sidebarOpen" class="text-sm font-medium whitespace-nowrap">Dashboard</span>
             </a>
 
-            <p class="text-sky-400/60 text-xs font-semibold uppercase tracking-wider px-3 mt-4 mb-2">Gestión</p>
+            <p x-show="sidebarOpen" class="text-sky-400/60 text-xs font-semibold uppercase tracking-wider px-3 mt-4 mb-2 transition-all">Gestión</p>
 
             <a href="{{ route('clientes.index') }}"
-               class="nav-link-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('clientes.*') ? 'nav-item-active text-white' : '' }}">
-                <svg class="w-5 h-5 text-emerald-400 group-hover:text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+               :title="!sidebarOpen ? 'Clientes' : ''"
+               class="nav-link-item flex items-center py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('clientes.*') ? 'nav-item-active text-white' : '' }}"
+               :class="sidebarOpen ? 'px-3 gap-3' : 'justify-center px-0 mt-2'">
+                <svg class="w-5 h-5 text-emerald-400 group-hover:text-emerald-300 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <!-- Center user -->
+                    <g class="user-center">
+                        <path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                        <path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1" />
+                    </g>
+                    <!-- Right user -->
+                    <g class="user-right">
+                        <path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                        <path d="M17 10h2a2 2 0 0 1 2 2v1" />
+                    </g>
+                    <!-- Left user -->
+                    <g class="user-left">
+                        <path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                        <path d="M3 13v-1a2 2 0 0 1 2 -2h2" />
+                    </g>
                 </svg>
-                <span class="text-sm font-medium">Clientes</span>
+                <span x-show="sidebarOpen" class="text-sm font-medium whitespace-nowrap">Clientes</span>
             </a>
 
             <a href="{{ route('mascotas.index') }}"
-               class="nav-link-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('mascotas.*') ? 'nav-item-active text-white' : '' }}">
-                <span class="text-lg">🐶</span>
-                <span class="text-sm font-medium">Mascotas</span>
+               :title="!sidebarOpen ? 'Mascotas' : ''"
+               class="nav-link-item flex items-center py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('mascotas.*') ? 'nav-item-active text-white' : '' }}"
+               :class="sidebarOpen ? 'px-3 gap-3' : 'justify-center px-0 mt-2'">
+                <svg class="w-5 h-5 text-cyan-400 group-hover:text-cyan-300 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="overflow: visible;">
+                    <g class="paw-inner">
+                        <circle cx="11" cy="4" r="2" />
+                        <circle cx="18" cy="8" r="2" />
+                        <circle cx="20" cy="16" r="2" />
+                        <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z" />
+                    </g>
+                </svg>
+                <span x-show="sidebarOpen" class="text-sm font-medium whitespace-nowrap">Mascotas</span>
             </a>
 
             <a href="{{ route('citas.index') }}"
-               class="nav-link-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('citas.*') ? 'nav-item-active text-white' : '' }}">
-                <svg class="w-5 h-5 text-violet-400 group-hover:text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+               :title="!sidebarOpen ? 'Citas' : ''"
+               class="nav-link-item flex items-center py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('citas.*') ? 'nav-item-active text-white' : '' }}"
+               :class="sidebarOpen ? 'px-3 gap-3' : 'justify-center px-0 mt-2'">
+                <svg class="w-5 h-5 text-violet-400 group-hover:text-violet-300 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" class="clock-body" />
+                    <path d="M12 7v5l3 3" class="clock-hands" />
                 </svg>
-                <span class="text-sm font-medium">Citas</span>
+                <span x-show="sidebarOpen" class="text-sm font-medium whitespace-nowrap">Citas</span>
             </a>
 
             <a href="{{ route('productos.index') }}"
-               class="nav-link-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('productos.*') ? 'nav-item-active text-white' : '' }}">
-                <svg class="w-5 h-5 text-amber-400 group-hover:text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+               :title="!sidebarOpen ? 'Productos' : ''"
+               class="nav-link-item flex items-center py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('productos.*') ? 'nav-item-active text-white' : '' }}"
+               :class="sidebarOpen ? 'px-3 gap-3' : 'justify-center px-0 mt-2'">
+                <svg class="w-5 h-5 text-amber-400 group-hover:text-amber-300 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path class="star-fill" d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" fill="currentColor" />
+                    <path class="star-outline" d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
                 </svg>
-                <span class="text-sm font-medium">Productos</span>
+                <span x-show="sidebarOpen" class="text-sm font-medium whitespace-nowrap">Productos</span>
             </a>
 
             <a href="{{ route('ventas.index') }}"
-               class="nav-link-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('ventas.*') ? 'nav-item-active text-white' : '' }}">
-                <svg class="w-5 h-5 text-rose-400 group-hover:text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+               :title="!sidebarOpen ? 'Ventas' : ''"
+               class="nav-link-item flex items-center py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('ventas.*') ? 'nav-item-active text-white' : '' }}"
+               :class="sidebarOpen ? 'px-3 gap-3' : 'justify-center px-0 mt-2'">
+                <svg class="w-5 h-5 text-rose-400 group-hover:text-rose-300 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-miterlimit="10" stroke-linecap="square">
+                    <g class="cart-upper">
+                        <path d="M8.49994 10H41L37.569 21.4367C36.9345 23.5517 34.9879 25 32.7798 25H10.4999" />
+                        <path d="M41 32H9.46174C7.17727 32 6.08953 29.1885 7.77914 27.651L10.6923 25L7.81067 5.14103C7.63231 3.91188 6.57863 3.00005 5.33661 3.00003L3 3" />
+                        <path class="cart-item" d="M30 16L30 19" />
+                        <path class="cart-item" d="M24 16L24 19" />
+                        <path class="cart-item" d="M18 16L18 19" />
+                    </g>
+                    <path class="cart-wheel" d="M11 45C13.2091 45 15 43.2091 15 41C15 38.7909 13.2091 37 11 37C8.79086 37 7 38.7909 7 41C7 43.2091 8.79086 45 11 45Z" />
+                    <path class="cart-wheel" d="M37 45C39.2091 45 41 43.2091 41 41C41 38.7909 39.2091 37 37 37C34.7909 37 33 38.7909 33 41C33 43.2091 34.7909 45 37 45Z" />
                 </svg>
-                <span class="text-sm font-medium">Ventas</span>
+                <span x-show="sidebarOpen" class="text-sm font-medium whitespace-nowrap">Ventas</span>
             </a>
 
         </nav>
 
         <!-- User Info (bottom) -->
-        <div class="px-4 py-4 border-t border-white/10">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+        <div class="py-4 border-t border-white/10" :class="sidebarOpen ? 'px-4' : 'px-2'">
+            <div class="flex items-center" :class="sidebarOpen ? 'gap-3' : 'flex-col gap-4 justify-center'">
+                <!-- Avatar -->
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 cursor-pointer"
+                     @click="!sidebarOpen ? profileOpen = true : null"
+                     :title="!sidebarOpen ? 'Mi Perfil' : ''">
                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                 </div>
-                <!-- User Info button triggers profile modal -->
-                <button type="button" @click="profileOpen = true" class="flex-1 min-w-0 flex flex-col text-left hover:bg-white/5 rounded-lg p-1 -ml-1 transition-colors group">
+                
+                <!-- Text Info -->
+                <button type="button" @click="profileOpen = true" x-show="sidebarOpen" class="flex-1 min-w-0 flex flex-col text-left hover:bg-white/5 rounded-lg p-1 -ml-1 transition-colors group">
                     <p class="text-white text-sm font-medium truncate group-hover:text-sky-300 transition-colors">{{ Auth::user()->name }}</p>
                     <p class="text-slate-400 text-xs truncate">{{ Auth::user()->email }}</p>
                 </button>
-                <form method="POST" action="{{ route('logout') }}">
+                
+                <!-- Logout Button -->
+                <form method="POST" action="{{ route('logout') }}" :class="!sidebarOpen ? 'mt-2' : ''">
                     @csrf
                     <button type="submit" title="Cerrar sesión"
-                            class="text-slate-400 hover:text-rose-400 transition-colors group">
+                            class="text-slate-400 hover:text-rose-400 transition-colors group"
+                            :class="sidebarOpen ? '' : 'p-2'">
                         <!-- Icono de Cerrar Sesión Animado -->
                         <svg class="w-5 h-5" 
                              xmlns="http://www.w3.org/2000/svg" 
@@ -381,7 +566,7 @@
         </header>
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto bg-slate-50 p-6">
+        <main id="swup" class="flex-1 overflow-y-auto bg-slate-50 p-6 transition-main">
             @if(session('success'))
                 <div id="flash-success"
                      class="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl shadow-sm">

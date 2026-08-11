@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\HasCreator;
 
 class Cita extends Model
 {
-    use HasFactory;
+    use HasFactory, HasCreator;
     public const SERVICIOS_PRECIOS = [
         'Consulta General' => 500,
         'Vacunación' => 350,
@@ -33,6 +35,7 @@ class Cita extends Model
         'enviado_whatsapp',
         'cliente_id',
         'mascota_id',
+        'user_id',
     ];
 
     protected $casts = [
@@ -43,11 +46,16 @@ class Cita extends Model
 
     public function cliente(): BelongsTo
     {
-        return $this->belongsTo(Cliente::class);
+        return $this->belongsTo(Cliente::class)->withoutGlobalScope('user_id');
     }
 
     public function mascota(): BelongsTo
     {
-        return $this->belongsTo(Mascota::class);
+        return $this->belongsTo(Mascota::class)->withoutGlobalScope('user_id');
+    }
+
+    public function confirmaciones(): HasMany
+    {
+        return $this->hasMany(CitaConfirmacion::class);
     }
 }

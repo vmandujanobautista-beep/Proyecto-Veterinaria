@@ -50,6 +50,14 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if (! Auth::user()->activo) {
+            Auth::logout();
+            
+            throw ValidationException::withMessages([
+                'email' => 'Tu cuenta ha sido desactivada. Ya no tienes acceso al sistema.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

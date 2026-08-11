@@ -1,9 +1,16 @@
 <!DOCTYPE html>
+@php
+    $config = \App\Models\Configuracion::instancia();
+    $clinica_nombre = $config->clinica_nombre ?: 'VetCare';
+    $clinica_direccion = $config->clinica_direccion ?: 'Dirección no registrada';
+    $clinica_telefono = $config->clinica_telefono ?: 'Sin teléfono';
+    $clinica_email = $config->clinica_email ?: config('mail.from.address');
+@endphp
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmación de Cita — VetCare</title>
+    <title>Confirmación de Cita — {{ $clinica_nombre }}</title>
     <style>
         body {
             margin: 0; padding: 0;
@@ -59,7 +66,7 @@
     <!-- HEADER -->
     <div class="header">
         <div style="font-size:42px;">🐾</div>
-        <h1>VetCare</h1>
+        <h1>{{ $clinica_nombre }}</h1>
         <p>Gestión Veterinaria Profesional</p>
     </div>
 
@@ -143,18 +150,18 @@
 
         <p style="font-size:13px; color:#64748b; text-align:center; margin:0;">
             ¿Necesitas cancelar o reprogramar?
-            Escríbenos a <a href="mailto:{{ config('mail.from.address') }}" style="color:#0284c7; font-weight:600; text-decoration:none;">{{ config('mail.from.address') }}</a>
-            o llámanos al <strong>📞 55 1234 5678</strong>
+            Escríbenos a <a href="mailto:{{ $clinica_email }}" style="color:#0284c7; font-weight:600; text-decoration:none;">{{ $clinica_email }}</a>
+            o llámanos al <strong>📞 {{ $clinica_telefono }}</strong>
         </p>
     </div>
 
     <!-- FOOTER -->
     <div class="footer">
-        <p class="brand">🐾 VetCare</p>
-        <p>Av. Veterinaria 123 · Ciudad de México · CDMX 06000</p>
-        <p>Lunes–Viernes: 9:00–18:00 · Sábados: 9:00–14:00 · Urgencias 24/7</p>
+        <p class="brand">🐾 {{ $clinica_nombre }}</p>
+        <p>{{ $clinica_direccion }}</p>
+        <p>Lunes—Viernes: 9:00—18:00 • Sábados: 9:00—14:00 • Urgencias 24/7</p>
         <p style="margin-top:12px; color:#cbd5e1; font-size:11px;">
-            © {{ date('Y') }} VetCare. Este correo fue enviado a {{ $cita->cliente->email }}.
+            © {{ date('Y') }} {{ $clinica_nombre }}. Este correo fue enviado a {{ $cita->cliente->email }}.
         </p>
     </div>
 

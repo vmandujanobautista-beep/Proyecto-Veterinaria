@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Cita;
 use App\Models\Cliente;
+use App\Models\Mascota;
+use App\Models\Producto;
+use App\Models\User;
 use App\Models\Venta;
 use Illuminate\Support\Facades\Cache;
 
@@ -13,9 +16,6 @@ class DashboardController extends Controller
     {
         $hoy = now()->toDateString();
 
-        // ── Estadísticas cacheadas (TTL: 60 segundos) ──────────────────────
-        // Las tarjetas de conteo no cambian con alta frecuencia; cachearlas
-        // evita 4 queries extra en cada carga del dashboard.
         $totalClientes = Cache::remember('dashboard_total_clientes', 60, fn () =>
             Cliente::count()
         );
@@ -30,9 +30,8 @@ class DashboardController extends Controller
             Venta::where('user_id', $userId)->whereDate('created_at', $hoy)->sum('total')
         );
 
-        // Mascotas se obtiene via relación; se puede cachear si el modelo existe
         $totalMascotas = Cache::remember('dashboard_total_mascotas', 60, fn () =>
-            \App\Models\Mascota::count()
+            Mascota::count()
         );
 
         $mesActual = now()->format('Y-m');
@@ -42,10 +41,9 @@ class DashboardController extends Controller
         );
 
         $mascotasEsteMes = Cache::remember("dashboard_mascotas_mes_{$mesActual}", 60, fn () =>
-            \App\Models\Mascota::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count()
+            Mascota::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count()
         );
 
-        // ── Próximas citas (hoy en adelante) — eager loading para evitar N+1 ──
         $proximasCitas = Cita::with(['mascota:id,nombre,especie', 'cliente:id,nombre,apellido,telefono'])
             ->select(['id', 'fecha', 'hora', 'tipo_servicio', 'estado', 'cliente_id', 'mascota_id'])
             ->whereDate('fecha', '>=', $hoy)
@@ -55,12 +53,48 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
-        // ── Últimos clientes registrados — eager loading y columnas necesarias ──
         $ultimosClientes = Cliente::select(['id', 'nombre', 'apellido', 'email', 'telefono', 'created_at'])
             ->withCount('mascotas')
             ->latest()
             ->limit(5)
             ->get();
+
+        // Estadisticas adicionales para el Administrador
+        $adminStats = null;
+        if (auth()->user()->isAdmin()) {
+            $adminStats = [
+                'ventas_mes' => Cache::remember("admin_ventas_mes_{$mesActual}", 60, fn () =>
+                    Venta::whereYear('created_at', now()->year)
+                        ->whereMonth('created_at', now()->month)
+                        ->where('estado', '!=', 'cancelada')
+                        ->sum('total')
+                ),
+                'citas_canceladas' => Cache::remember("admin_citas_canceladas_{$mesActual}", 60, fn () =>
+                    Cita::whereYear('created_at', now()->year)
+                        ->whereMonth('created_at', now()->month)
+                        ->where('estado', 'cancelada')
+                        ->count()
+                ),
+                'productos_bajo_stock' => Cache::remember('admin_productos_bajo_stock', 60, fn () =>
+                    Producto::where('stock', '<=', 5)->count()
+                ),
+                'total_usuarios' => Cache::remember('admin_total_usuarios', 60, fn () =>
+                    User::count()
+                ),
+                'usuarios_activos' => Cache::remember('admin_usuarios_activos', 60, fn () =>
+                    User::where('activo', true)->count()
+                ),
+                'productos_bajo' => Producto::where('stock', '<=', 5)
+                    ->select(['id', 'nombre', 'stock', 'categoria'])
+                    ->orderBy('stock')
+                    ->limit(5)
+                    ->get(),
+                'actividad_reciente' => User::select(['id', 'name', 'role', 'last_login_at', 'activo'])
+                    ->orderByDesc('last_login_at')
+                    ->limit(5)
+                    ->get(),
+            ];
+        }
 
         return view('dashboard', compact(
             'totalClientes',
@@ -70,7 +104,8 @@ class DashboardController extends Controller
             'citasHoy',
             'ventasHoy',
             'proximasCitas',
-            'ultimosClientes'
+            'ultimosClientes',
+            'adminStats'
         ));
     }
 }

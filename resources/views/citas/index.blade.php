@@ -421,43 +421,19 @@
                                         </button>
                                     @endif
 
-                                    {{-- Email --}}
-                                    <form method="POST" action="{{ route('citas.enviar-email', $cita) }}">
-                                        @csrf
-                                        <button type="submit"
-                                                title="{{ $cita->estado === 'completada' ? 'Cita completada' : ($cita->enviado_email ? 'Reenviar email' : 'No seleccionado') }}"
-                                                {{ (!$cita->enviado_email || $cita->estado === 'completada') ? 'disabled' : '' }}
-                                                class="group/btn-send p-1.5 rounded-lg transition-colors
-                                                       {{ ($cita->enviado_email && $cita->estado !== 'completada')
-                                                           ? 'text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50'
-                                                           : 'text-slate-300 opacity-50 cursor-not-allowed' }}">
-                                            <svg class="w-4 h-4 overflow-visible" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <g class="send-icon">
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                    <path d="M10 14l11 -11" />
-                                                    <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
-                                                </g>
-                                            </svg>
-                                        </button>
-                                    </form>
-
-                                    {{-- WhatsApp --}}
-                                    <form method="POST" action="{{ route('citas.enviar-whatsapp', $cita) }}">
-                                        @csrf
-                                        <button type="submit"
-                                                title="{{ $cita->estado === 'completada' ? 'Cita completada' : ($cita->enviado_whatsapp ? 'Reenviar WhatsApp' : 'No seleccionado') }}"
-                                                {{ (!$cita->enviado_whatsapp || $cita->estado === 'completada') ? 'disabled' : '' }}
-                                                class="group/btn-whatsapp p-1.5 rounded-lg transition-colors
-                                                       {{ ($cita->enviado_whatsapp && $cita->estado !== 'completada')
-                                                           ? 'text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50'
-                                                           : 'text-slate-300 opacity-50 cursor-not-allowed' }}">
-                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    {{-- Detalles / Notificaciones --}}
+                                    <button type="button"
+                                            @click="$dispatch('ver-cita', { id: {{ $cita->id }} })"
+                                            title="Detalles y Notificaciones"
+                                            class="group/btn-send p-1.5 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors">
+                                        <svg class="w-4 h-4 overflow-visible" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <g class="send-icon">
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" />
-                                                <path class="phone-icon" d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" />
-                                            </svg>
-                                        </button>
-                                    </form>
+                                                <path d="M10 14l11 -11" />
+                                                <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+                                            </g>
+                                        </svg>
+                                    </button>
 
                                     {{-- Editar --}}
                                     @if(in_array($cita->estado, ['completada', 'confirmada', 'cancelada']))

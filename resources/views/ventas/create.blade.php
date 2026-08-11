@@ -72,7 +72,7 @@
     {{-- ═══════════════════════════════════════════
          LAYOUT PRINCIPAL — 2 columnas
     ════════════════════════════════════════════ --}}
-    <div x-data="posApp()" x-init="iniciar()" class="flex gap-5 items-start">
+    <div x-data="posApp()" class="flex gap-5 items-start">
 
         {{-- ══════════ COLUMNA IZQUIERDA: Catálogo (60%) ══════════ --}}
         <div class="flex-1 min-w-0">
@@ -104,9 +104,11 @@
                                    sm:w-48 transition-all">
                         <option value="">Todas las categorías</option>
                         <option value="Medicamento">💊 Medicamento</option>
+                        <option value="Alimento">🥗 Alimento</option>
+                        <option value="Accesorio">🎾 Accesorio</option>
+                        <option value="Higiene">🧴 Higiene</option>
                         <option value="Vacuna">💉 Vacuna</option>
-                        <option value="Alimento">🥩 Alimento</option>
-                        <option value="Accesorio">🎀 Accesorio</option>
+                        <option value="Suplemento">🌿 Suplemento</option>
                         <option value="Otro">📦 Otro</option>
                     </select>
                 </div>
@@ -307,14 +309,14 @@
                         </label>
 
                         {{-- Carrito vacío --}}
-                        <div x-show="carrito.length === 0"
+                        <div x-show="carrito.length === 0" x-transition
                              class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center">
                             <span class="text-3xl">🛒</span>
                             <p class="text-sm text-slate-400 mt-2">Agrega productos desde el catálogo</p>
                         </div>
 
                         {{-- Ítems del carrito --}}
-                        <div id="carrito-lista" x-show="carrito.length > 0" class="space-y-2">
+                        <div id="carrito-lista" x-show="carrito.length > 0" x-transition class="space-y-2">
                             <template x-for="(item, i) in carrito" :key="item.id">
                                 <div class="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2.5 border border-slate-100">
                                     {{-- Nombre --}}
@@ -349,7 +351,7 @@
                     </div>
 
                     {{-- Total --}}
-                    <div x-show="carrito.length > 0"
+                    <div x-show="carrito.length > 0" x-transition
                          class="bg-emerald-50 rounded-xl px-4 py-3 border border-emerald-100">
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-semibold text-emerald-800">TOTAL</span>
@@ -423,29 +425,28 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    {{-- Modal de Confirmación de Salida --}}
-    <div id="modal-salida" class="fixed inset-0 z-[300] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm transform transition-all">
-            <h3 class="text-lg font-bold text-slate-800 mb-2">El Sistema dice</h3>
-            <p class="text-sm text-slate-600 mb-4">Para salir de la Venta Actual, ingresa la contraseña de Admin:</p>
-            <input type="password" id="input-pass-salida" class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm mb-4" placeholder="Contraseña">
-            <div class="flex justify-end gap-3">
-                <button type="button" onclick="cerrarModalSalida()" class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Cancelar</button>
-                <button type="button" onclick="confirmarSalida()" class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-sm">Aceptar</button>
+        {{-- Modal de Confirmación de Salida --}}
+        <div x-cloak x-show="mostrarModalSalida" class="fixed inset-0 z-[300] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+            <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm transform transition-all" @click.away="cerrarModalSalida()">
+                <h3 class="text-lg font-bold text-slate-800 mb-2">El Sistema dice</h3>
+                <p class="text-sm text-slate-600 mb-4">Para salir de la Venta Actual, ingresa la contraseña de Admin:</p>
+                <input type="password" id="input-pass-salida" x-model="passSalida" @keydown.enter="confirmarSalida()" class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm mb-4" placeholder="Contraseña">
+                <div class="flex justify-end gap-3">
+                    <button type="button" @click="cerrarModalSalida()" class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Cancelar</button>
+                    <button type="button" @click="confirmarSalida()" class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-sm">Aceptar</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-    function posApp() {
+    <script data-swup-script>
+    window.posApp = function() {
         return {
             // Catálogo
             buscar: '',
             categoria: '',
             paginaActual: 1,
-            productos: {},
+            productos: { data: [] },
             cargandoProductos: false,
 
             // Carrito
@@ -463,6 +464,13 @@
             montoRecibido: '',
             cobrando: false,
 
+            // Modal Salida
+            mostrarModalSalida: false,
+            targetUrlForExit: null,
+            passSalida: '',
+            exitInterceptor: null,
+            beforeUnloadInterceptor: null,
+
             get totalCarrito() {
                 return this.carrito.reduce((s, i) => s + i.precio * i.cantidad, 0);
             },
@@ -471,8 +479,64 @@
                 return this.montoRecibido - this.totalCarrito;
             },
 
-            async iniciar() {
-                await this.buscarProductos();
+            init() {
+                this.buscarProductos();
+
+                this.exitInterceptor = (e) => {
+                    const link = e.target.closest('a');
+                    if (link && link.href && !link.href.includes('#') && !link.href.startsWith('javascript:')) {
+                        // Ignorar clics dentro del modal
+                        if (document.getElementById('modal-salida')?.contains(link)) return;
+
+                        const currentUrl = window.location.origin + window.location.pathname;
+                        const linkUrl = link.origin + link.pathname;
+                        
+                        if (linkUrl !== currentUrl) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.abrirModalSalida(link.href);
+                        }
+                    }
+                };
+                document.addEventListener('click', this.exitInterceptor, true);
+
+                this.beforeUnloadInterceptor = (e) => {
+                    e.preventDefault();
+                    e.returnValue = '';
+                };
+                window.addEventListener('beforeunload', this.beforeUnloadInterceptor);
+            },
+
+            destroy() {
+                if (this.exitInterceptor) document.removeEventListener('click', this.exitInterceptor, true);
+                if (this.beforeUnloadInterceptor) window.removeEventListener('beforeunload', this.beforeUnloadInterceptor);
+            },
+
+            abrirModalSalida(url) {
+                this.targetUrlForExit = url;
+                this.passSalida = '';
+                this.mostrarModalSalida = true;
+                setTimeout(() => document.getElementById('input-pass-salida')?.focus(), 50);
+            },
+
+            cerrarModalSalida() {
+                this.mostrarModalSalida = false;
+                this.targetUrlForExit = null;
+            },
+
+            confirmarSalida() {
+                if (this.passSalida.toLowerCase() === 'password') {
+                    this.destroy();
+                    if (window.swup) {
+                        window.swup.navigate(this.targetUrlForExit);
+                    } else {
+                        window.location.href = this.targetUrlForExit;
+                    }
+                } else {
+                    alert('Contraseña incorrecta');
+                    this.passSalida = '';
+                    document.getElementById('input-pass-salida')?.focus();
+                }
             },
 
             async buscarProductos() {
@@ -658,68 +722,6 @@
                 return map[cat] || '📦';
             },
         };
-    }
-    // Variables globales para el modal de salida
-    let targetUrlForExit = null;
-    const modalSalida = document.getElementById('modal-salida');
-    const inputPassSalida = document.getElementById('input-pass-salida');
-
-    function abrirModalSalida(url) {
-        targetUrlForExit = url;
-        modalSalida.classList.remove('hidden');
-        modalSalida.classList.add('flex');
-        inputPassSalida.value = '';
-        setTimeout(() => inputPassSalida.focus(), 50);
-    }
-
-    function cerrarModalSalida() {
-        modalSalida.classList.add('hidden');
-        modalSalida.classList.remove('flex');
-        targetUrlForExit = null;
-    }
-
-    function confirmarSalida() {
-        if (inputPassSalida.value === 'PASSWORD') {
-            window.location.href = targetUrlForExit;
-        } else {
-            alert('Contraseña incorrecta');
-            inputPassSalida.value = '';
-            inputPassSalida.focus();
-        }
-    }
-
-    if (inputPassSalida) {
-        inputPassSalida.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                confirmarSalida();
-            }
-        });
-    }
-
-    // Interceptar cualquier enlace de navegación (menú lateral, botón atrás, etc.)
-    document.addEventListener('click', function(e) {
-        const link = e.target.closest('a');
-        
-        // Verificamos que sea un enlace válido, que no sea la página actual y que no sea un enlace vacío/hash (#)
-        if (link && link.href && !link.href.includes('#') && !link.href.startsWith('javascript:')) {
-            // Ignoramos clics dentro del propio modal (botones cancelar/aceptar, etc)
-            if (modalSalida && modalSalida.contains(link)) return;
-
-            // Verificamos si estamos saliendo de esta URL
-            if (link.href !== window.location.href) {
-                e.preventDefault();
-                abrirModalSalida(link.href);
-            }
-        }
-    });
-
-    // Interceptar el cierre del navegador o pestaña, o recarga (F5)
-    // Nota: Por seguridad, los navegadores modernos no permiten mostrar un 'prompt' de contraseña aquí, 
-    // solo muestran su mensaje genérico de confirmación ("¿Seguro que quieres salir?").
-    window.addEventListener('beforeunload', function(e) {
-        e.preventDefault();
-        e.returnValue = ''; // Muestra el mensaje nativo del navegador
-    });
+    };
     </script>
 </x-app-layout>

@@ -154,4 +154,36 @@ class ProductoController extends Controller
             'admins'  => $admins->count(),
         ]);
     }
+
+    public function getNextSku(Request $request)
+    {
+        $categoria = $request->query('categoria');
+        if (!$categoria) {
+            return response()->json(['sku' => '']);
+        }
+
+        $prefix = match($categoria) {
+            'Medicamento' => 'MED',
+            'Alimento'    => 'ALI',
+            'Accesorio'   => 'ACC',
+            'Higiene'     => 'HIG',
+            'Vacuna'      => 'VAC',
+            'Suplemento'  => 'SUP',
+            default       => 'OTR',
+        };
+
+        $latestProduct = Producto::where('codigo', 'like', "{$prefix}-%")
+            ->orderByRaw('CAST(SUBSTRING(codigo, 5) AS UNSIGNED) DESC')
+            ->first();
+
+        if ($latestProduct && preg_match("/{$prefix}-(\d+)/", $latestProduct->codigo, $matches)) {
+            $nextNumber = intval($matches[1]) + 1;
+        } else {
+            $nextNumber = 1;
+        }
+
+        $nextSku = $prefix . '-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+
+        return response()->json(['sku' => $nextSku]);
+    }
 }

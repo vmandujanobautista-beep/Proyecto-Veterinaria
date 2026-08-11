@@ -266,7 +266,7 @@
                         <input
                             type="text"
                             x-model="email"
-                            @input="email = email.toLowerCase().replace(/[\sñáéíóúÁÉÍÓÚÑ\[\]{}<>\"':;\\]/g, '')"
+                            @input="email = email.toLowerCase().replace(/[^a-z0-9@._-]/g, '')"
                             :readonly="!editando"
                             :style="editando
                                 ? 'border:1.5px solid #3b82f6; background:#f8fafc; color:#1e293b;'

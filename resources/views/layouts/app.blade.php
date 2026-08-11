@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+@php
+    $clinica_config = \App\Models\Configuracion::instancia();
+    $clinica_nombre = $clinica_config->clinica_nombre ?? 'VetCare';
+@endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
@@ -6,7 +10,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Sistema de Gestión Veterinaria - Administra clientes, mascotas y citas de tu clínica veterinaria">
 
-    <title>{{ config('app.name', 'VetCare') }} | {{ $title ?? 'Dashboard' }}</title>
+    <title>{{ $clinica_nombre }} | {{ $title ?? 'Dashboard' }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -309,9 +313,9 @@
         pageLoading: false 
      }"
      x-init="$watch('sidebarOpen', val => localStorage.setItem('sidebarOpen', val))"
-     @show-loader.window="pageLoading = true; setTimeout(() => { pageLoading = false }, 8000);"
+     @show-loader.window="pageLoading = true; setTimeout(() => { pageLoading = false }, 3000);"
      @hide-loader.window="pageLoading = false"
-     @loading.window="$event.detail ? (pageLoading = true, setTimeout(() => { pageLoading = false }, 8000)) : (pageLoading = false)">
+     @loading.window="$event.detail ? (pageLoading = true, setTimeout(() => { pageLoading = false }, 3000)) : (pageLoading = false)">
 
     <!-- ===== SIDEBAR ===== -->
     <aside id="sidebar" :class="sidebarOpen ? 'w-72' : 'w-[72px]'" class="vet-sidebar flex-shrink-0 flex flex-col transition-all duration-300 z-40">
@@ -322,17 +326,21 @@
             <!-- Lado Izquierdo: Agrupamos el Icono de Usuario y el Texto -->
             <div class="flex items-center gap-3">
                 
-                <!-- Contenedor del Icono de Usuario -->
-                <div class="w-12 h-12 bg-[#0c3859] rounded-full flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
+                <!-- Contenedor del Logo / Icono -->
+                <div class="w-12 h-12 bg-[#0c3859] rounded-full flex items-center justify-center shrink-0 overflow-hidden">
+                    @if($clinica_config->clinica_logo)
+                        <img src="{{ Storage::url($clinica_config->clinica_logo) }}" alt="Logo" class="w-full h-full object-cover">
+                    @else
+                        <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    @endif
                 </div>
                 
                 <!-- Textos -->
                 <div class="whitespace-nowrap overflow-hidden transition-all duration-300" :class="sidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 hidden'">
-                    <h1 class="text-white text-xl font-bold leading-tight">VetCare</h1>
+                    <h1 class="text-white text-xl font-bold leading-tight">{{ $clinica_nombre }}</h1>
                     <p class="text-sky-300 text-sm leading-tight">Gestión Veterinaria</p>
                 </div>
             </div>
@@ -453,6 +461,42 @@
                 <span x-show="sidebarOpen" class="text-sm font-medium whitespace-nowrap">Ventas</span>
             </a>
 
+            {{-- ===== BLOQUE ADMINISTRACIÓN (solo Admin) ===== --}}
+            @if(Auth::user()->isAdmin())
+                <div x-show="sidebarOpen" class="text-sky-400/60 text-xs font-semibold uppercase tracking-wider px-3 mt-5 mb-2 transition-all flex items-center gap-2">
+                    <svg class="w-3 h-3 text-sky-400/60 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    Administración
+                </div>
+                <div x-show="!sidebarOpen" class="border-t border-white/10 mt-3 mb-1"></div>
+
+                <a href="{{ route('admin.usuarios.index') }}"
+                   :title="!sidebarOpen ? 'Usuarios y Roles' : ''"
+                   class="nav-link-item flex items-center py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('admin.usuarios.*') ? 'nav-item-active text-white' : '' }}"
+                   :class="sidebarOpen ? 'px-3 gap-3' : 'justify-center px-0 mt-2'">
+                    <svg class="w-5 h-5 text-indigo-400 group-hover:text-indigo-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <g class="transition-transform duration-200 ease-out origin-center group-hover:scale-105 group-hover:-translate-y-[1px]">
+                            <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                            <path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
+                        </g>
+                        <path d="M15 19l2 2l4 -4" class="transition-all duration-300 ease-out origin-[18px_19px] group-hover:scale-110" 
+                              style="stroke-dasharray: 20; stroke-dashoffset: 0;" />
+                    </svg>
+                    <span x-show="sidebarOpen" class="text-sm font-medium whitespace-nowrap">Usuarios y roles</span>
+                </a>
+
+                <a href="{{ route('admin.configuracion.index') }}"
+                   :title="!sidebarOpen ? 'Configuración' : ''"
+                   class="nav-link-item flex items-center py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('admin.configuracion.*') ? 'nav-item-active text-white' : '' }}"
+                   :class="sidebarOpen ? 'px-3 gap-3' : 'justify-center px-0 mt-2'">
+                    <svg class="w-5 h-5 text-teal-400 group-hover:text-teal-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span x-show="sidebarOpen" class="text-sm font-medium whitespace-nowrap">Configuración</span>
+                </a>
+            @endif
+
         </nav>
 
         <!-- User Info (bottom) -->
@@ -519,7 +563,7 @@
     <div class="flex-1 flex flex-col overflow-hidden">
 
         <!-- Top Header Bar -->
-        <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
+        <header id="swup-header" class="transition-main bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div>
                 @isset($header)
                     {{ $header }}

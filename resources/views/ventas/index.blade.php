@@ -37,7 +37,36 @@
     {{-- ═══ MODALS ═══ --}}
 
     {{-- Modal VER DETALLE --}}
-    <div x-data="verVentaModal()"
+    <div x-data="{
+            open: false, cargando: false, venta: null,
+            async abrir(id) {
+                this.open = true; this.cargando = true; this.venta = null;
+                try {
+                    const r = await fetch(`/ventas/${id}`, {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await r.json();
+                    const clienteNombre = data.cliente
+                        ? (data.cliente.nombre + ' ' + (data.cliente.apellido_paterno ?? data.cliente.apellido ?? '')).trim()
+                        : '—';
+                    const fecha = new Date(data.venta.created_at);
+                    this.venta = {
+                        ...data.venta,
+                        folio:             data.folio,
+                        cliente_nombre:    clienteNombre,
+                        mascota_nombre:    data.mascota?.nombre ?? '—',
+                        cajero:            data.user?.name ?? '—',
+                        productos:         data.productos,
+                        created_at_formatted: fecha.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+                    };
+                } catch(e) { this.cerrar(); }
+                finally { this.cargando = false; }
+            },
+            cerrar() { this.open = false; },
+            fmt(n) {
+                return Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+         }"
          x-cloak
          x-show="open"
          x-transition:enter="transition ease-out duration-250"
@@ -163,7 +192,11 @@
     </div>
 
     {{-- Modal CANCELAR VENTA --}}
-    <div x-data="cancelarVentaModal()"
+    <div x-data="{
+            open: false, ventaId: null, folio: '',
+            abrir(id, folio) { this.open = true; this.ventaId = id; this.folio = folio; },
+            cerrar() { this.open = false; }
+         }"
          x-cloak
          x-show="open"
          x-transition:enter="transition ease-out duration-250"
@@ -414,50 +447,5 @@
         @endif
     </div>
 
-    <script>
-    function verVentaModal() {
-        return {
-            open: false, cargando: false, venta: null,
-
-            async abrir(id) {
-                this.open = true; this.cargando = true; this.venta = null;
-                try {
-                    const r = await fetch(`/ventas/${id}`, {
-                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                    });
-                    const data = await r.json();
-                    const clienteNombre = data.cliente
-                        ? (data.cliente.nombre + ' ' + (data.cliente.apellido_paterno ?? data.cliente.apellido ?? '')).trim()
-                        : '—';
-                    const fecha = new Date(data.venta.created_at);
-                    this.venta = {
-                        ...data.venta,
-                        folio:             data.folio,
-                        cliente_nombre:    clienteNombre,
-                        mascota_nombre:    data.mascota?.nombre ?? '—',
-                        cajero:            data.user?.name ?? '—',
-                        productos:         data.productos,
-                        created_at_formatted: fecha.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }),
-                    };
-                } catch(e) { this.cerrar(); }
-                finally { this.cargando = false; }
-            },
-
-            cerrar() { this.open = false; },
-
-            fmt(n) {
-                return Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            },
-        };
-    }
-
-    function cancelarVentaModal() {
-        return {
-            open: false, ventaId: null, folio: '',
-            abrir(id, folio) { this.open = true; this.ventaId = id; this.folio = folio; },
-            cerrar() { this.open = false; },
-        };
-    }
-    </script>
 
 </x-app-layout>

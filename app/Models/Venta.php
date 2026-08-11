@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\BelongsToUser;
 
 class Venta extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToUser;
 
     protected $fillable = [
         'total',
@@ -26,12 +27,12 @@ class Venta extends Model
 
     public function cliente(): BelongsTo
     {
-        return $this->belongsTo(Cliente::class);
+        return $this->belongsTo(Cliente::class)->withoutGlobalScope('user_id');
     }
 
     public function mascota(): BelongsTo
     {
-        return $this->belongsTo(Mascota::class);
+        return $this->belongsTo(Mascota::class)->withoutGlobalScope('user_id');
     }
 
     public function user(): BelongsTo

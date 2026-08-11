@@ -49,7 +49,7 @@ class ClienteController extends Controller
             'apellido_paterno' => ['required', 'string', 'max:100', 'regex:/^[\pL\s]+$/u'],
             'apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[\pL\s]+$/u'],
             'apellido'         => ['nullable', 'string', 'max:255'],
-            'email'            => ['nullable', 'string', 'max:255', new ValidStrictEmailRule()],
+            'email'            => ['nullable', 'string', 'max:255', 'unique:clientes,email', new ValidStrictEmailRule()],
             'telefono'         => ['required', 'string', 'max:20'],
             'codigo_pais'      => ['nullable', 'string', 'max:10'],
             'direccion'        => ['nullable', 'string', 'max:500'],
@@ -62,6 +62,7 @@ class ClienteController extends Controller
             'apellido_paterno.required' => 'El apellido paterno es obligatorio.',
             'apellido_paterno.regex'    => 'El apellido paterno solo puede contener letras y espacios.',
             'apellido_materno.regex'    => 'El apellido materno solo puede contener letras y espacios.',
+            'email.unique'              => 'Este correo electrónico ya está registrado en el sistema por otro usuario o cliente.',
             'telefono.required'         => 'El teléfono es obligatorio.',
         ]);
 
@@ -188,12 +189,24 @@ class ClienteController extends Controller
             'apellido_paterno' => ['nullable', 'string', 'max:100', 'regex:/^[\pL\s]+$/u'],
             'apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[\pL\s]+$/u'],
             'apellido'         => ['nullable', 'string', 'max:255'],
-            'email'            => ['nullable', 'string', 'max:255', new ValidStrictEmailRule()],
+            'email'            => [
+                'nullable', 
+                'string', 
+                'max:255', 
+                \Illuminate\Validation\Rule::unique('clientes')->ignore($cliente->id), 
+                new ValidStrictEmailRule()
+            ],
             'telefono'         => ['nullable', 'string', 'max:20'],
             'codigo_pais'      => ['nullable', 'string', 'max:10'],
             'direccion'        => ['nullable', 'string', 'max:500'],
             'codigo_postal'    => ['nullable', 'string', 'max:10'],
             'estado'           => ['nullable', 'in:activo,inactivo'],
+        ], [
+            'nombre.required'           => 'El nombre es obligatorio.',
+            'nombre.regex'              => 'El nombre solo puede contener letras y espacios.',
+            'apellido_paterno.regex'    => 'El apellido paterno solo puede contener letras y espacios.',
+            'apellido_materno.regex'    => 'El apellido materno solo puede contener letras y espacios.',
+            'email.unique'              => 'Este correo electrónico ya está registrado en el sistema por otro usuario o cliente.',
         ]);
 
         if (!empty($data['apellido_paterno'])) {

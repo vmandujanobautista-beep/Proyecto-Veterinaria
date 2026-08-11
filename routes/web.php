@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminConfiguracionController;
+use App\Http\Controllers\Admin\AdminReportesController;
+use App\Http\Controllers\Admin\AdminUsuarioController;
 use App\Http\Controllers\AuthModalController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\ClienteController;
@@ -36,6 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('citas', CitaController::class);
     Route::post('/productos/{producto}/solicitar-reabastecimiento', [ProductoController::class, 'solicitarReabastecimiento'])
          ->name('productos.solicitar-reabastecimiento');
+    Route::get('/api/productos/next-sku', [ProductoController::class, 'getNextSku'])->name('api.productos.next-sku');
     Route::resource('productos', ProductoController::class);
     // Rutas API de ventas (deben ir ANTES del resource para evitar conflictos)
     Route::get('/api/ventas/productos',                 [VentaController::class, 'getProductos'])->name('api.ventas.productos');
@@ -44,23 +48,36 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/ventas/{venta}/cancelar',             [VentaController::class, 'cancelar'])->name('ventas.cancelar');
 
     Route::post('/citas/{cita}/confirmar',        [CitaController::class, 'confirmar'])->name('citas.confirmar');
-    Route::post('/citas/{cita}/confirmar-whatsapp',[CitaController::class, 'confirmarWhatsapp'])->name('citas.confirmar-whatsapp');
+    Route::post('/citas/{cita}/notificar',        [CitaController::class, 'notificar'])->name('citas.notificar');
+    Route::post('/confirmaciones/{confirmacion}/reintentar', [CitaController::class, 'reintentarConfirmacion'])->name('confirmaciones.reintentar');
     Route::post('/citas/{cita}/cancelar',          [CitaController::class, 'cancelar'])->name('citas.cancelar');
     Route::post('/citas/{cita}/completar',         [CitaController::class, 'completar'])->name('citas.completar');
-    Route::post('/citas/{cita}/enviar-email',      [CitaController::class, 'enviarEmail'])->name('citas.enviar-email');
-    Route::post('/citas/{cita}/enviar-whatsapp',   [CitaController::class, 'enviarWhatsapp'])->name('citas.enviar-whatsapp');
     Route::get('/api/clientes/{cliente}/mascotas', [CitaController::class, 'mascotasPorCliente'])->name('api.clientes.mascotas');
     Route::get('/api/clientes',                    [CitaController::class, 'listarClientes'])->name('api.clientes.listar');
+
+    // ── RUTAS EXCLUSIVAS DE ADMINISTRADOR ────────────────────────────────────
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+
+        // Usuarios y Roles
+        Route::get('/usuarios',                        [AdminUsuarioController::class, 'index'])->name('usuarios.index');
+        Route::post('/usuarios',                       [AdminUsuarioController::class, 'store'])->name('usuarios.store');
+        Route::put('/usuarios/{user}',                 [AdminUsuarioController::class, 'update'])->name('usuarios.update');
+        Route::post('/usuarios/{user}/toggle-activo',  [AdminUsuarioController::class, 'toggleActivo'])->name('usuarios.toggle-activo');
+        Route::post('/usuarios/{user}/reset-password', [AdminUsuarioController::class, 'resetPassword'])->name('usuarios.reset-password');
+
+        // Configuración
+        Route::get('/configuracion',   [AdminConfiguracionController::class, 'index'])->name('configuracion.index');
+        Route::post('/configuracion',  [AdminConfiguracionController::class, 'update'])->name('configuracion.update');
+
+        // Reportes
+        Route::get('/reportes',        [AdminReportesController::class, 'index'])->name('reportes.index');
+        Route::get('/reportes/datos',  [AdminReportesController::class, 'datos'])->name('reportes.datos');
+    });
 });
 
 Route::middleware('auth')->group(function () {
-    // Las rutas de la página de perfil anterior se eliminan porque ahora usamos el Modal.
-
     // Modal de Perfil — actualización vía JSON (Alpine.js fetch)
     Route::post('/perfil/actualizar', [ProfileController::class, 'actualizarPerfil'])->name('perfil.actualizar');
 });
 
 require __DIR__.'/auth.php';
-
-
-

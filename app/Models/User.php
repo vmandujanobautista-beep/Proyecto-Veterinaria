@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -28,6 +29,8 @@ class User extends Authenticatable
         'telefono',
         'direccion',
         'fecha_nacimiento_bloqueada',
+        'last_login_at',
+        'activo',
     ];
 
     /**
@@ -52,6 +55,42 @@ class User extends Authenticatable
             'password'                    => 'hashed',
             'fecha_nacimiento'            => 'date',
             'fecha_nacimiento_bloqueada'  => 'boolean',
+            'last_login_at'               => 'datetime',
+            'activo'                      => 'boolean',
         ];
+    }
+
+    // ── Role helpers ──────────────────────────────────────────────────────────
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isRecepcionista(): bool
+    {
+        return $this->role === 'recepcionista';
+    }
+
+    // ── Relations ─────────────────────────────────────────────────────────────
+
+    public function clientes(): HasMany
+    {
+        return $this->hasMany(Cliente::class);
+    }
+
+    public function mascotas(): HasMany
+    {
+        return $this->hasMany(Mascota::class);
+    }
+
+    public function citas(): HasMany
+    {
+        return $this->hasMany(Cita::class);
+    }
+
+    public function ventas(): HasMany
+    {
+        return $this->hasMany(Venta::class);
     }
 }

@@ -6,7 +6,9 @@ use App\Mail\CitaConfirmacionMail;
 use App\Models\Cita;
 use App\Models\Cliente;
 use App\Models\Mascota;
+use App\Models\CitaConfirmacion;
 use App\Services\WhatsappService;
+use App\Services\EmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -104,45 +106,28 @@ class CitaController extends Controller
 
         event(new CitaCreada($cita));
 
-        // Enviar email si se marcó la opción
-        try {
-            if ($data['enviado_email'] && $cita->cliente?->email) {
-                Mail::to($cita->cliente->email)->queue(new CitaConfirmacionMail($cita));
-            }
-        } catch (\Throwable $e) {
-            Log::error('Error al enviar email de cita: ' . $e->getMessage());
-        }
-
-        // Enviar WhatsApp si se marcó la opción
-        try {
-            if ($data['enviado_whatsapp'] && $cita->cliente?->telefono) {
-                app(WhatsappService::class)->enviarConfirmacionCita($cita);
-            }
-        } catch (\Throwable $e) {
-            Log::error('Error al enviar WhatsApp de cita: ' . $e->getMessage());
-        }
+        // Ya no enviamos automáticamente, la confirmación es explícita.
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => 'Cita agendada correctamente.']);
         }
 
         return redirect()->route('citas.index')
-                         ->with('success', 'Cita agendada correctamente.');
+                         ->with('success', 'Cita agendada correctamente. ¿Deseas enviar la confirmación ahora?')
+                         ->with('abrir_detalle', $cita->id);
     }
 
     public function show(Cita $cita)
     {
-        $cita->load(['cliente', 'mascota']);
+        $cita->load(['cliente', 'mascota', 'confirmaciones']);
 
-        if (request()->expectsJson()) {
+        if (request()->expectsJson() || request()->ajax()) {
             return response()->json([
-                'cita'    => $cita,
-                'cliente' => $cita->cliente,
-                'mascota' => $cita->mascota,
+                'html' => view('partials.modals.modal-ver-cita-body', compact('cita'))->render()
             ]);
         }
 
-        return view('citas.show', compact('cita'));
+        return redirect()->route('citas.index')->with('abrir_detalle', $cita->id);
     }
 
     public function edit(Cita $cita)
@@ -189,36 +174,95 @@ class CitaController extends Controller
     }
 
     /**
-     * Confirma la cita y envía email de notificación.
+     * Procesa la solicitud explícita de enviar notificaciones.
      */
-    public function confirmar(Cita $cita)
+    public function notificar(Request $request, Cita $cita)
     {
-        $cita->update(['estado' => 'confirmada']);
+        $request->validate([
+            'canales' => ['required', 'array'],
+            'canales.*' => ['in:whatsapp,email']
+        ]);
 
-        try {
-            if ($cita->cliente?->email) {
-                Mail::to($cita->cliente->email)->queue(new CitaConfirmacionMail($cita));
-            }
-        } catch (\Throwable $e) {
-            Log::error('Error al confirmar cita por email: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Cita confirmada, pero hubo un error al enviar el correo.');
+        $canales = $request->input('canales', []);
+        $cita->load('cliente');
+        $mensajes = [];
+        $hayError = false;
+
+        if (in_array('email', $canales)) {
+            $emailService = app(EmailService::class);
+            $resultado = $emailService->enviarConfirmacionCita($cita);
+            
+            $estado = $resultado['success'] ? 'enviado' : 'error';
+            if (!$resultado['success']) $hayError = true;
+            
+            $cita->confirmaciones()->create([
+                'canal' => 'email',
+                'destinatario' => $cita->cliente->email ?? '—',
+                'estado' => $estado,
+                'mensaje_error' => $resultado['error'],
+                'provider_message_id' => $resultado['provider_id'],
+                'fecha_envio' => now(),
+            ]);
+
+            $mensajes[] = $resultado['success'] ? 'Correo enviado.' : 'Error al enviar correo.';
         }
 
-        return redirect()->back()->with('success', 'Cita confirmada y correo enviado.');
+        if (in_array('whatsapp', $canales)) {
+            $waService = app(WhatsappService::class);
+            $resultado = $waService->enviarConfirmacionCita($cita);
+            
+            $estado = $resultado['success'] ? 'enviado' : 'error';
+            if (!$resultado['success']) $hayError = true;
+            
+            $cita->confirmaciones()->create([
+                'canal' => 'whatsapp',
+                'destinatario' => $cita->cliente->telefono ?? '—',
+                'estado' => $estado,
+                'mensaje_error' => $resultado['error'],
+                'provider_message_id' => $resultado['provider_id'],
+                'fecha_envio' => now(),
+            ]);
+
+            $mensajes[] = $resultado['success'] ? 'WhatsApp enviado.' : 'Error al enviar WhatsApp.';
+        }
+
+        if ($hayError) {
+            $redirect = redirect()->back()->with('error', implode(' ', $mensajes) . ' Revisa el historial de envíos para reintentar.');
+            return $request->has('from_modal') ? $redirect->with('abrir_detalle', $cita->id) : $redirect;
+        }
+
+        $redirect = redirect()->back()->with('success', 'Confirmación enviada correctamente.');
+        return $request->has('from_modal') ? $redirect->with('abrir_detalle', $cita->id) : $redirect;
     }
 
     /**
-     * Envía confirmación por WhatsApp.
+     * Reintenta enviar una confirmación específica.
      */
-    public function confirmarWhatsapp(Cita $cita)
+    public function reintentarConfirmacion(CitaConfirmacion $confirmacion)
     {
-        try {
-            app(WhatsappService::class)->enviarConfirmacionCita($cita);
-            return redirect()->back()->with('success', 'Mensaje de WhatsApp enviado.');
-        } catch (\Throwable $e) {
-            Log::error('Error al confirmar cita por WhatsApp: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Ocurrió un error al intentar enviar el mensaje de WhatsApp.');
+        $cita = $confirmacion->cita;
+        $cita->load('cliente');
+
+        if ($confirmacion->canal === 'email') {
+            $resultado = app(EmailService::class)->enviarConfirmacionCita($cita);
+        } else {
+            $resultado = app(WhatsappService::class)->enviarConfirmacionCita($cita);
         }
+
+        $confirmacion->update([
+            'estado' => $resultado['success'] ? 'enviado' : 'error',
+            'mensaje_error' => $resultado['error'],
+            'provider_message_id' => $resultado['provider_id'],
+            'fecha_envio' => now(),
+        ]);
+
+        if (!$resultado['success']) {
+            $redirect = redirect()->back()->with('error', 'Error al reintentar: ' . $resultado['error']);
+            return request()->has('from_modal') ? $redirect->with('abrir_detalle', $cita->id) : $redirect;
+        }
+
+        $redirect = redirect()->back()->with('success', 'Confirmación reenviada correctamente.');
+        return request()->has('from_modal') ? $redirect->with('abrir_detalle', $cita->id) : $redirect;
     }
 
     /**
@@ -249,45 +293,12 @@ class CitaController extends Controller
     }
 
     /**
-     * Envía recordatorio por email y marca enviado_email = true.
+     * Confirma la cita sin enviar notificaciones automáticamente.
      */
-    public function enviarEmail(Cita $cita)
+    public function confirmar(Cita $cita)
     {
-        $cita->load('cliente');
-
-        if ($cita->cliente?->email) {
-            try {
-                Mail::to($cita->cliente->email)->queue(new CitaConfirmacionMail($cita));
-                $cita->update(['enviado_email' => true]);
-                return redirect()->back()->with('success', 'Recordatorio por email enviado a ' . $cita->cliente->email);
-            } catch (\Throwable $e) {
-                Log::error('Error al enviar recordatorio por email: ' . $e->getMessage());
-                return redirect()->back()->with('error', 'Ocurrió un error al intentar enviar el recordatorio por correo.');
-            }
-        }
-
-        return redirect()->back()->with('error', 'El cliente no tiene email registrado.');
-    }
-
-    /**
-     * Envía recordatorio por WhatsApp y marca enviado_whatsapp = true.
-     */
-    public function enviarWhatsapp(Cita $cita)
-    {
-        $cita->load('cliente');
-
-        if ($cita->cliente?->telefono) {
-            try {
-                app(WhatsappService::class)->enviarConfirmacionCita($cita);
-                $cita->update(['enviado_whatsapp' => true]);
-                return redirect()->back()->with('success', 'Recordatorio por WhatsApp enviado.');
-            } catch (\Throwable $e) {
-                Log::error('Error al enviar recordatorio por WhatsApp: ' . $e->getMessage());
-                return redirect()->back()->with('error', 'Ocurrió un error al intentar enviar el recordatorio por WhatsApp.');
-            }
-        }
-
-        return redirect()->back()->with('error', 'El cliente no tiene teléfono registrado.');
+        $cita->update(['estado' => 'confirmada']);
+        return redirect()->back()->with('success', 'Cita confirmada.');
     }
 
     /**

@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\HasCreator;
 
 class Cliente extends Model
 {
-    use HasFactory;
+    use HasFactory, HasCreator;
 
     protected $fillable = [
         'nombre',
@@ -22,6 +23,7 @@ class Cliente extends Model
         'codigo_postal',
         'foto',
         'estado',
+        'user_id',
     ];
 
     protected $casts = [

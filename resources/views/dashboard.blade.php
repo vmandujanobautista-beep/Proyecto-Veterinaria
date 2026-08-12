@@ -183,36 +183,6 @@
                         </div>
                     </div>
                     
-                    <button type="button" 
-                        @click="descargarPDF()"
-                        :disabled="descargandoPDF"
-                        :class="descargandoPDF ? 'opacity-60 cursor-not-allowed' : 'group'"
-                        class="mt-4 px-5 py-2 text-sm font-medium flex items-center gap-2 btn-gradient btn-red">
-                        <svg class="w-5 h-5 text-white" :class="descargandoPDF ? 'animate-pulse' : ''" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M14 3v4a1 1 0 0 0 1 1h4" class="file-animated-path" />
-                            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
-                            <path d="M9 17h6" class="file-animated-path" />
-                            <path d="M9 13h6" class="file-animated-path" />
-                        </svg>
-                        <span x-text="descargandoPDF ? 'Generando...' : 'PDF'"></span>
-                    </button>
-
-                    <button type="button" 
-                        @click="exportarCSV()"
-                        :disabled="descargandoCSV"
-                        :class="descargandoCSV ? 'opacity-60 cursor-not-allowed' : 'group'"
-                        class="mt-4 px-5 py-2 text-sm font-medium flex items-center gap-2 btn-gradient btn-green">
-                        <svg class="w-5 h-5 text-white" :class="descargandoCSV ? 'animate-pulse' : ''" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M14 3v4a1 1 0 0 0 1 1h4" class="file-animated-path" />
-                            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
-                            <path d="M9 17h6" class="file-animated-path" />
-                            <path d="M9 13h6" class="file-animated-path" />
-                        </svg>
-                        <span x-text="descargandoCSV ? 'Generando...' : 'Excel'"></span>
-                    </button>
-
                     <button type="button" @click="cargar()"
                         class="mt-4 px-5 py-2 text-sm font-medium flex items-center gap-2 group btn-gradient btn-blue">
                         <svg class="w-5 h-5 text-white transition-transform duration-500 ease-in-out group-hover:rotate-180" :class="cargando ? 'animate-spin' : ''" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -221,6 +191,19 @@
                             <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
                         </svg>
                         Actualizar
+                    </button>
+
+                    <button type="button" 
+                        @click="descargarPDF()"
+                        class="mt-4 px-5 py-2 text-sm font-medium flex items-center gap-2 group btn-gradient btn-red">
+                        <svg class="w-5 h-5 text-white group-hover:animate-pulse" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M14 3v4a1 1 0 0 0 1 1h4" class="file-animated-path" />
+                            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                            <path d="M9 17h6" class="file-animated-path" />
+                            <path d="M9 13h6" class="file-animated-path" />
+                        </svg>
+                        <span>PDF</span>
                     </button>
                 </div>
             </div>
@@ -611,98 +594,7 @@
             },
 
             descargarPDF() {
-                if (this.descargandoPDF) return;
-                this.descargandoPDF = true;
-
-                // Mostrar la cabecera premium antes de imprimir
-                const header = document.getElementById('pdf-header');
-                if (header) header.style.display = 'block';
-
-                setTimeout(() => {
-                    window.print();
-                    // Ocultar la cabecera y desbloquear el botón después
-                    setTimeout(() => {
-                        if (header) header.style.display = 'none';
-                        this.descargandoPDF = false;
-                    }, 1500);
-                }, 300);
-            },
-
-            exportarCSV() {
-                if (this.descargandoCSV) return;
-                const ventas = this.datos.ventas ?? [];
-                if (ventas.length === 0) {
-                    alert('No hay ventas para exportar en este periodo.');
-                    return;
-                }
-
-                this.descargandoCSV = true;
-
-                // ── SECCIÓN 1: Resumen Ejecutivo del Sistema ──
-                const clinica = '{{ $clinica_nombre ?? 'VetCare' }}';
-                const fechaGen = new Date().toLocaleString('es-MX');
-                const resumen = [
-                    ['REPORTE GENERAL DEL SISTEMA - ' + clinica],
-                    ['Periodo:', this.desde + ' al ' + this.hasta],
-                    ['Generado el:', fechaGen],
-                    [],
-                    ['=== RESUMEN EJECUTIVO ==='],
-                    ['Métrica', 'Valor'],
-                    ['Total Clientes Registrados', this.datos.totalClientesGlobal ?? 0],
-                    ['Clientes Nuevos (periodo)', this.datos.clientesNuevos ?? 0],
-                    ['Total Mascotas Registradas', this.datos.totalMascotasGlobal ?? 0],
-                    ['Mascotas Nuevas (periodo)', this.datos.mascotasNuevas ?? 0],
-                    ['Citas en el Periodo', this.datos.citasPeriodoActual ?? 0],
-                    ['Citas Completadas', this.datos.citasPorEstado?.completada ?? 0],
-                    ['Citas Confirmadas', this.datos.citasPorEstado?.confirmada ?? 0],
-                    ['Citas Pendientes', this.datos.citasPorEstado?.pendiente ?? 0],
-                    ['Citas Canceladas', this.datos.citasPorEstado?.cancelada ?? 0],
-                    ['Ingresos Totales ($)', Number(this.datos.ventasTotales ?? 0).toFixed(2)],
-                    ['Total Ventas Registradas', this.datos.ventasCount ?? 0],
-                    [],
-                    ['=== DETALLE DE VENTAS ==='],
-                    ['#', 'Cliente', 'Atendido por', 'Fecha', 'Estado', 'Total ($)'],
-                ];
-
-                const filas = ventas.map(v => [
-                    v.id,
-                    `"${v.cliente}"`,
-                    `"${v.usuario}"`,
-                    `"${v.fecha}"`,
-                    v.estado,
-                    Number(v.total).toFixed(2)
-                ]);
-
-                // ── SECCIÓN 2: Tabla de Ingresos por Día ──
-                const ventasPorDia = this.datos.ventasPorDia ?? [];
-                const seccionDias = [
-                    [],
-                    ['=== INGRESOS POR DÍA ==='],
-                    ['Fecha', 'Ingresos ($)', 'N° Ventas'],
-                    ...ventasPorDia.map(d => [d.fecha, Number(d.total).toFixed(2), d.cantidad])
-                ];
-
-                // ── Combinar todo ──
-                const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-                const toRow = arr => arr.map(c => c ?? '').join(',');
-                const csvContent = [
-                    ...resumen.map(toRow),
-                    ...filas.map(f => f.join(',')),
-                    ...seccionDias.map(toRow)
-                ].join('\n');
-
-                const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const enlace = document.createElement('a');
-                enlace.setAttribute('href', url);
-                enlace.setAttribute('download', `Reporte_${clinica}_${this.desde}_al_${this.hasta}.csv`);
-                document.body.appendChild(enlace);
-                enlace.click();
-                document.body.removeChild(enlace);
-                URL.revokeObjectURL(url);
-
-                // Desbloquear después de 2 segundos para evitar doble clic
-                setTimeout(() => { this.descargandoCSV = false; }, 2000);
+                window.open(`{{ route('admin.reportes.pdf') }}?desde=${this.desde}&hasta=${this.hasta}`, '_blank');
             },
 
             async cargar() {

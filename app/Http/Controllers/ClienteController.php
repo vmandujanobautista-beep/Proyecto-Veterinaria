@@ -88,16 +88,8 @@ class ClienteController extends Controller
             if (is_array($mascotasData) && count($mascotasData) > 0) {
                 foreach ($mascotasData as $m) {
                     if (!empty($m['nombre']) && !empty($m['especie'])) {
-                        $cliente->mascotas()->create([
-                            'nombre'           => trim($m['nombre']),
-                            'especie'          => $m['especie'],
-                            'raza'             => $m['raza'] ?? null,
-                            'sexo'             => !empty($m['sexo']) ? strtolower($m['sexo']) : null,
-                            'peso'             => !empty($m['peso']) ? floatval($m['peso']) : null,
-                            'fecha_nacimiento' => !empty($m['fecha_nacimiento']) ? $m['fecha_nacimiento'] : null,
-                            'color_pelaje'     => $m['color_pelaje'] ?? null,
-                            'nota_medica'      => $m['nota_medica'] ?? null,
-                        ]);
+                        // buildMascotaData() centraliza la construcción del array — DRY
+                        $cliente->mascotas()->create($this->buildMascotaData($m));
                     }
                 }
             }
@@ -231,30 +223,12 @@ class ClienteController extends Controller
                         // Actualizar existente
                         $mascota = Mascota::find($m['id']);
                         if ($mascota && $mascota->cliente_id === $cliente->id) {
-                            $mascota->update([
-                                'nombre'           => trim($m['nombre']),
-                                'especie'          => $m['especie'],
-                                'raza'             => $m['raza'] ?? null,
-                                'sexo'             => !empty($m['sexo']) ? strtolower($m['sexo']) : null,
-                                'peso'             => !empty($m['peso']) ? floatval($m['peso']) : null,
-                                'fecha_nacimiento' => !empty($m['fecha_nacimiento']) ? $m['fecha_nacimiento'] : null,
-                                'color_pelaje'     => $m['color_pelaje'] ?? null,
-                                'nota_medica'      => $m['nota_medica'] ?? null,
-                            ]);
+                            $mascota->update($this->buildMascotaData($m));
                             $keptIds[] = $mascota->id;
                         }
                     } else {
                         // Crear nueva
-                        $newMascota = $cliente->mascotas()->create([
-                            'nombre'           => trim($m['nombre']),
-                            'especie'          => $m['especie'],
-                            'raza'             => $m['raza'] ?? null,
-                            'sexo'             => !empty($m['sexo']) ? strtolower($m['sexo']) : null,
-                            'peso'             => !empty($m['peso']) ? floatval($m['peso']) : null,
-                            'fecha_nacimiento' => !empty($m['fecha_nacimiento']) ? $m['fecha_nacimiento'] : null,
-                            'color_pelaje'     => $m['color_pelaje'] ?? null,
-                            'nota_medica'      => $m['nota_medica'] ?? null,
-                        ]);
+                        $newMascota = $cliente->mascotas()->create($this->buildMascotaData($m));
                         $keptIds[] = $newMascota->id;
                     }
                 }
@@ -369,5 +343,27 @@ class ClienteController extends Controller
                 'foto_url'         => $fotoPath ? asset('storage/' . $fotoPath) : null,
             ],
         ], 201);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  HELPERS PRIVADOS
+    // ══════════════════════════════════════════════════════════
+
+    /**
+     * Construye el array de datos de mascota a partir del input del request.
+     * Centraliza los 3 bloques idénticos que existían en store, update y storeMascotaModal.
+     */
+    private function buildMascotaData(array $m): array
+    {
+        return [
+            'nombre'           => trim($m['nombre']),
+            'especie'          => $m['especie'],
+            'raza'             => $m['raza'] ?? null,
+            'sexo'             => !empty($m['sexo']) ? strtolower($m['sexo']) : null,
+            'peso'             => !empty($m['peso']) ? floatval($m['peso']) : null,
+            'fecha_nacimiento' => !empty($m['fecha_nacimiento']) ? $m['fecha_nacimiento'] : null,
+            'color_pelaje'     => $m['color_pelaje'] ?? null,
+            'nota_medica'      => $m['nota_medica'] ?? null,
+        ];
     }
 }

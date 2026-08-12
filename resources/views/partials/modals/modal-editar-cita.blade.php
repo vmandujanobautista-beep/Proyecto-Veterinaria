@@ -234,8 +234,13 @@
                                    focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
                                    hover:border-slate-300 appearance-none transition-all">
                         <option value="">— Selecciona servicio —</option>
-                        @foreach(\App\Models\Cita::SERVICIOS_PRECIOS as $servicio => $precio)
-                            <option value="{{ $servicio }}">{{ $servicio }} - ${{ number_format($precio, 2) }}</option>
+                        @php
+                            $configServicios = \App\Models\Configuracion::instancia()->servicios;
+                            if(is_string($configServicios)) $configServicios = json_decode($configServicios, true);
+                            $servicios = $configServicios ?: [['nombre' => 'Consulta General', 'precio' => 500]];
+                        @endphp
+                        @foreach($servicios as $s)
+                            <option value="{{ $s['nombre'] }}">{{ $s['nombre'] }} - ${{ number_format($s['precio'], 2) }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -367,6 +372,11 @@ function editarCitaModal() {
         minHora: '08:00',
         maxHora: '20:00',
         opcionesHora: [],
+        horariosBase: @json(
+            is_string(\App\Models\Configuracion::instancia()->horarios) 
+            ? json_decode(\App\Models\Configuracion::instancia()->horarios, true) 
+            : (\App\Models\Configuracion::instancia()->horarios ?: [])
+        ),
         form: {
             fecha: '',
             hora: '',
@@ -519,15 +529,33 @@ function editarCitaModal() {
             const parts = this.form.fecha.split('-');
             if (parts.length !== 3) return;
             const date = new Date(parts[0], parts[1] - 1, parts[2]);
-            const day = date.getDay(); // 0 = Domingo
+            const dayIndex = date.getDay(); // 0 = Domingo
             
-            if (day === 0) {
-                this.minHora = '10:00';
-                this.maxHora = '18:00';
+            const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+            const nombreDiaSeleccionado = diasSemana[dayIndex];
+            
+            let horarioEncontrado = null;
+            for (let h of this.horariosBase) {
+                let nombreRango = h.dia.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (nombreRango.includes(nombreDiaSeleccionado) || (nombreDiaSeleccionado === 'lunes' && nombreRango.includes('lun'))) {
+                    horarioEncontrado = h;
+                    break;
+                }
+                if (nombreRango.includes('viernes') && dayIndex >= 1 && dayIndex <= 5 && nombreRango.includes('lunes')) {
+                    horarioEncontrado = h;
+                    break;
+                }
+            }
+            
+            if (horarioEncontrado && !horarioEncontrado.cerrado) {
+                this.minHora = horarioEncontrado.apertura || '08:00';
+                this.maxHora = horarioEncontrado.cierre || '20:00';
             } else {
+                // Fallback si está cerrado o no se encuentra el día, mostramos algunas horas por defecto
                 this.minHora = '08:00';
                 this.maxHora = '20:00';
             }
+            
             this.generarOpcionesHora();
         },
 

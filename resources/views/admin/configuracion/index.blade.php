@@ -11,22 +11,106 @@
         @csrf
 
         {{-- Tabs de navegación --}}
-        <div class="flex gap-1 mb-5 bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 w-fit">
+        <style>
+            .glass-radio-group {
+                --bg: rgba(255, 255, 255, 0.7);
+                --text: #64748b;
+                
+                display: flex;
+                position: relative;
+                background: var(--bg);
+                border-radius: 1rem;
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                box-shadow:
+                    inset 1px 1px 4px rgba(255, 255, 255, 0.8),
+                    inset -1px -1px 6px rgba(0, 0, 0, 0.05),
+                    0 4px 12px rgba(0, 0, 0, 0.05);
+                overflow: hidden;
+                width: fit-content;
+                margin-bottom: 1.5rem;
+            }
+            .glass-radio-group input {
+                display: none;
+            }
+            .glass-radio-group label {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                min-width: 120px;
+                font-size: 14px;
+                padding: 0.8rem 1.6rem;
+                cursor: pointer;
+                font-weight: 600;
+                letter-spacing: 0.3px;
+                color: var(--text);
+                position: relative;
+                z-index: 2;
+                transition: color 0.3s ease-in-out;
+            }
+            .glass-radio-group label:hover {
+                color: #0f172a;
+            }
+            .glass-radio-group input:checked + label {
+                color: #fff;
+            }
+            .glass-glider {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                width: calc(100% / 4);
+                border-radius: 1rem;
+                z-index: 1;
+                transition:
+                    transform 0.5s cubic-bezier(0.37, 1.95, 0.66, 0.56),
+                    background 0.4s ease-in-out,
+                    box-shadow 0.4s ease-in-out;
+            }
+
+            /* Clínica (Platinum) */
+            #tab-clinica:checked ~ .glass-glider {
+                transform: translateX(0%);
+                background: linear-gradient(135deg, #60a5fa, #3b82f6);
+                box-shadow: 0 0 18px rgba(59, 130, 246, 0.5), 0 0 10px rgba(255, 255, 255, 0.3) inset;
+            }
+            /* Horarios (Silver) */
+            #tab-horarios:checked ~ .glass-glider {
+                transform: translateX(100%);
+                background: linear-gradient(135deg, #94a3b8, #64748b);
+                box-shadow: 0 0 18px rgba(100, 116, 139, 0.5), 0 0 10px rgba(255, 255, 255, 0.3) inset;
+            }
+            /* Servicios (Gold) */
+            #tab-servicios:checked ~ .glass-glider {
+                transform: translateX(200%);
+                background: linear-gradient(135deg, #fbbf24, #d97706);
+                box-shadow: 0 0 18px rgba(245, 158, 11, 0.5), 0 0 10px rgba(255, 255, 255, 0.3) inset;
+            }
+            /* Mensajes (Rose) */
+            #tab-mensajes:checked ~ .glass-glider {
+                transform: translateX(300%);
+                background: linear-gradient(135deg, #fb7185, #e11d48);
+                box-shadow: 0 0 18px rgba(225, 29, 72, 0.5), 0 0 10px rgba(255, 255, 255, 0.3) inset;
+            }
+        </style>
+
+        <div class="glass-radio-group">
             @foreach([
                 ['clinica',  'Clínica',    'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
                 ['horarios', 'Horarios',   'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
                 ['servicios','Servicios',  'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
                 ['mensajes', 'Mensajes',   'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'],
             ] as [$key, $label, $icon])
-                <button type="button" @click="tab = '{{ $key }}'"
-                        :class="tab === '{{ $key }}' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'"
-                        class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-150">
+                <input type="radio" name="tabs_nav" id="tab-{{ $key }}" x-model="tab" value="{{ $key }}" />
+                <label for="tab-{{ $key }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}"/>
                     </svg>
                     {{ $label }}
-                </button>
+                </label>
             @endforeach
+            <div class="glass-glider"></div>
         </div>
 
         {{-- Panel: Datos de la Clínica --}}
@@ -147,8 +231,14 @@
             <div class="space-y-3">
                 <template x-for="(horario, i) in horarios" :key="i">
                     <div class="flex flex-wrap items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                        <input type="text" x-model="horario.dia" placeholder="Ej. Lunes - Viernes"
-                               class="flex-1 min-w-[150px] px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <select x-model="horario.dia"
+                                class="flex-1 min-w-[150px] px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="">-- Selecciona el día o periodo --</option>
+                            <option value="Lunes - Viernes">Lunes - Viernes</option>
+                            <option value="Sábado">Sábado</option>
+                            <option value="Domingo">Domingo</option>
+                            <option value="Sábado y Domingo">Sábado y Domingo</option>
+                        </select>
                         <label class="flex items-center gap-2 text-sm text-slate-600">
                             <input type="checkbox" x-model="horario.cerrado" class="rounded">
                             Cerrado
@@ -169,7 +259,7 @@
                     </div>
                 </template>
                 <button type="button" @click="horarios.push({dia:'',apertura:'08:00',cierre:'18:00',cerrado:false})"
-                        class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-sm font-semibold transition-colors shadow-sm border border-blue-100">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Agregar horario
                 </button>
@@ -202,7 +292,7 @@
                     </div>
                 </template>
                 <button type="button" @click="servicios.push({nombre:'',precio:0})"
-                        class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-sm font-semibold transition-colors shadow-sm border border-blue-100">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Agregar servicio
                 </button>
@@ -251,7 +341,6 @@
     </form>
 </x-app-layout>
 
-@push('scripts')
 <script>
 @php
     $horarios = $config->horarios;
@@ -273,4 +362,3 @@ function servicioManager() {
     };
 }
 </script>
-@endpush

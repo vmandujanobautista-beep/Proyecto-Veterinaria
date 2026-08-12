@@ -12,7 +12,8 @@ class EmailService
 
     public function __construct()
     {
-        $this->testMode = env('VETCARE_NOTIFICATIONS_TEST_MODE', false);
+        // config() es compatible con php artisan config:cache, env() no lo es
+        $this->testMode = config('app.vetcare_test_mode', env('VETCARE_NOTIFICATIONS_TEST_MODE', false));
     }
 
     /**
@@ -35,11 +36,11 @@ class EmailService
 
         if ($this->testMode) {
             Log::info('Test Mode: Simulando envío de Email a ' . $email);
-            sleep(1); // Simular latencia de red
+            // Sin sleep() — no bloqueamos el hilo en modo de prueba
             return [
-                'success' => true,
+                'success'     => true,
                 'provider_id' => 'test_email_' . uniqid(),
-                'error' => null,
+                'error'       => null,
             ];
         }
 

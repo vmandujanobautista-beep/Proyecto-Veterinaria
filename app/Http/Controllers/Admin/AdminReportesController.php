@@ -27,6 +27,24 @@ class AdminReportesController extends Controller
         $desde = $request->input('desde', now()->startOfMonth()->toDateString());
         $hasta = $request->input('hasta', now()->toDateString());
 
+        $datos = $this->getDatosReporte($desde, $hasta);
+
+        return response()->json($datos);
+    }
+
+    public function pdf(Request $request)
+    {
+        $desde = $request->input('desde', now()->startOfMonth()->toDateString());
+        $hasta = $request->input('hasta', now()->toDateString());
+
+        $datos = $this->getDatosReporte($desde, $hasta);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.reportes.pdf', $datos);
+        return $pdf->download('reporte-supervision-'.$desde.'-'.$hasta.'.pdf');
+    }
+
+    private function getDatosReporte($desde, $hasta)
+    {
         // Ventas
         $ventasTotales     = Venta::whereBetween('created_at', [$desde, $hasta . ' 23:59:59'])
             ->where('estado', '!=', 'cancelada')
@@ -59,18 +77,19 @@ class AdminReportesController extends Controller
             ->orderBy('stock')
             ->get();
 
-        // Productos más vendidos en el periodo
-        $productosVendidos = \App\Models\VentaProducto::with(['producto', 'venta'])
-            ->whereHas('venta', fn ($q) => $q->whereBetween('created_at', [$desde, $hasta . ' 23:59:59']))
-            ->selectRaw('producto_id, SUM(cantidad) as total_vendido, SUM(subtotal) as total_ingresos')
-            ->groupBy('producto_id')
+        // JOIN directo — elimina el whereHas + carga de modelos Venta intermedios
+        $productosVendidos = \App\Models\VentaProducto::join('ventas', 'venta_productos.venta_id', '=', 'ventas.id')
+            ->join('productos', 'venta_productos.producto_id', '=', 'productos.id')
+            ->whereBetween('ventas.created_at', [$desde, $hasta . ' 23:59:59'])
+            ->selectRaw('productos.nombre, SUM(venta_productos.cantidad) as total_vendido, SUM(venta_productos.subtotal) as total_ingresos')
+            ->groupBy('productos.id', 'productos.nombre')
             ->orderByDesc('total_vendido')
             ->limit(10)
             ->get()
             ->map(fn ($vp) => [
-                'nombre'          => $vp->producto ? $vp->producto->nombre : '—',
-                'total_vendido'   => $vp->total_vendido,
-                'total_ingresos'  => $vp->total_ingresos,
+                'nombre'         => $vp->nombre,
+                'total_vendido'  => $vp->total_vendido,
+                'total_ingresos' => $vp->total_ingresos,
             ]);
 
         // Clientes y mascotas registrados en el periodo
@@ -125,7 +144,7 @@ class AdminReportesController extends Controller
         $totalClientesGlobal  = Cliente::count();
         $totalMascotasGlobal  = Mascota::count();
 
-        return response()->json(compact(
+        return compact(
             'ventasTotales',
             'ventasCount',
             'ventas',
@@ -147,6 +166,6 @@ class AdminReportesController extends Controller
             'totalMascotasGlobal',
             'desde',
             'hasta'
-        ));
+        );
     }
 }

@@ -11,18 +11,7 @@ use App\Traits\HasCreator;
 class Cita extends Model
 {
     use HasFactory, HasCreator;
-    public const SERVICIOS_PRECIOS = [
-        'Consulta General' => 500,
-        'Vacunación' => 350,
-        'Desparasitación' => 200,
-        'Baño y Corte' => 450,
-        'Esterilización/Castración' => 1200,
-        'Cirugía' => 3000,
-        'Laboratorio' => 800,
-        'Rayos X / Ultrasonido' => 950,
-        'Chequeo General' => 600,
-        'Urgencias' => 1500,
-    ];
+    // Los servicios y precios ahora se gestionan dinámicamente desde el modelo Configuracion
 
     protected $fillable = [
         'fecha',

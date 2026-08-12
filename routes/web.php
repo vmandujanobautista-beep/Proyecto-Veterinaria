@@ -72,6 +72,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Reportes
         Route::get('/reportes',        [AdminReportesController::class, 'index'])->name('reportes.index');
         Route::get('/reportes/datos',  [AdminReportesController::class, 'datos'])->name('reportes.datos');
+        Route::get('/reportes/pdf',    [AdminReportesController::class, 'pdf'])->name('reportes.pdf');
     });
 });
 

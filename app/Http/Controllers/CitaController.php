@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use App\Events\CitaCreada;
 use App\Events\CitaEditada;
 use App\Events\CitaEliminada;
+use App\Models\Configuracion;
 
 class CitaController extends Controller
 {
@@ -80,7 +81,13 @@ class CitaController extends Controller
     {
         $clientes = Cliente::select('id', 'nombre', 'apellido')->orderBy('nombre')->get();
         $mascotas = Mascota::with('cliente:id,nombre,apellido')->select('id', 'nombre', 'especie', 'cliente_id')->orderBy('nombre')->get();
-        return view('citas.create', compact('clientes', 'mascotas'));
+
+        // Un solo acceso a config — los métodos helpers incluyen los defaults
+        $config   = Configuracion::instancia();
+        $servicios = $config->getServiciosConDefault();
+        $horarios  = $config->getHorariosConDefault();
+
+        return view('citas.create', compact('clientes', 'mascotas', 'servicios', 'horarios'));
     }
 
     public function store(Request $request)
@@ -100,13 +107,13 @@ class CitaController extends Controller
         $data['estado']           = $data['estado']           ?? 'pendiente';
         $data['enviado_email']    = $request->boolean('enviado_email');
         $data['enviado_whatsapp'] = $request->boolean('enviado_whatsapp');
-        $data['precio']           = Cita::SERVICIOS_PRECIOS[$data['tipo_servicio']] ?? 0;
+
+        // lookupPrecioServicio() reemplaza el foreach duplicado
+        $data['precio'] = Configuracion::instancia()->lookupPrecioServicio($data['tipo_servicio']);
 
         $cita = Cita::create($data);
 
         event(new CitaCreada($cita));
-
-        // Ya no enviamos automáticamente, la confirmación es explícita.
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => 'Cita agendada correctamente.']);
@@ -132,9 +139,16 @@ class CitaController extends Controller
 
     public function edit(Cita $cita)
     {
-        $clientes = Cliente::orderBy('nombre')->get();
-        $mascotas = Mascota::with('cliente')->orderBy('nombre')->get();
-        return view('citas.edit', compact('cita', 'clientes', 'mascotas'));
+        // Selección de columnas mínimas para el listado de dropdowns
+        $clientes = Cliente::select('id', 'nombre', 'apellido')->orderBy('nombre')->get();
+        $mascotas = Mascota::with('cliente:id,nombre,apellido')->select('id', 'nombre', 'especie', 'cliente_id')->orderBy('nombre')->get();
+
+        // Reutiliza la misma instancia singleton (no hace otra query)
+        $config   = Configuracion::instancia();
+        $servicios = $config->getServiciosConDefault();
+        $horarios  = $config->getHorariosConDefault();
+
+        return view('citas.edit', compact('cita', 'clientes', 'mascotas', 'servicios', 'horarios'));
     }
 
     public function update(Request $request, Cita $cita)
@@ -153,7 +167,9 @@ class CitaController extends Controller
 
         $data['enviado_email']    = $request->boolean('enviado_email');
         $data['enviado_whatsapp'] = $request->boolean('enviado_whatsapp');
-        $data['precio']           = Cita::SERVICIOS_PRECIOS[$data['tipo_servicio']] ?? 0;
+
+        // lookupPrecioServicio() reemplaza el foreach duplicado
+        $data['precio'] = Configuracion::instancia()->lookupPrecioServicio($data['tipo_servicio']);
 
         $cita->update($data);
 
@@ -179,48 +195,44 @@ class CitaController extends Controller
     public function notificar(Request $request, Cita $cita)
     {
         $request->validate([
-            'canales' => ['required', 'array'],
+            'canales'   => ['required', 'array'],
             'canales.*' => ['in:whatsapp,email']
         ]);
 
-        $canales = $request->input('canales', []);
+        $canales  = $request->input('canales', []);
         $cita->load('cliente');
         $mensajes = [];
         $hayError = false;
 
         if (in_array('email', $canales)) {
-            $emailService = app(EmailService::class);
-            $resultado = $emailService->enviarConfirmacionCita($cita);
-            
-            $estado = $resultado['success'] ? 'enviado' : 'error';
+            $resultado = app(EmailService::class)->enviarConfirmacionCita($cita);
+            $estado    = $resultado['success'] ? 'enviado' : 'error';
             if (!$resultado['success']) $hayError = true;
-            
+
             $cita->confirmaciones()->create([
-                'canal' => 'email',
-                'destinatario' => $cita->cliente->email ?? '—',
-                'estado' => $estado,
-                'mensaje_error' => $resultado['error'],
+                'canal'               => 'email',
+                'destinatario'        => $cita->cliente->email ?? '—',
+                'estado'              => $estado,
+                'mensaje_error'       => $resultado['error'],
                 'provider_message_id' => $resultado['provider_id'],
-                'fecha_envio' => now(),
+                'fecha_envio'         => now(),
             ]);
 
             $mensajes[] = $resultado['success'] ? 'Correo enviado.' : 'Error al enviar correo.';
         }
 
         if (in_array('whatsapp', $canales)) {
-            $waService = app(WhatsappService::class);
-            $resultado = $waService->enviarConfirmacionCita($cita);
-            
-            $estado = $resultado['success'] ? 'enviado' : 'error';
+            $resultado = app(WhatsappService::class)->enviarConfirmacionCita($cita);
+            $estado    = $resultado['success'] ? 'enviado' : 'error';
             if (!$resultado['success']) $hayError = true;
-            
+
             $cita->confirmaciones()->create([
-                'canal' => 'whatsapp',
-                'destinatario' => $cita->cliente->telefono ?? '—',
-                'estado' => $estado,
-                'mensaje_error' => $resultado['error'],
+                'canal'               => 'whatsapp',
+                'destinatario'        => $cita->cliente->telefono ?? '—',
+                'estado'              => $estado,
+                'mensaje_error'       => $resultado['error'],
                 'provider_message_id' => $resultado['provider_id'],
-                'fecha_envio' => now(),
+                'fecha_envio'         => now(),
             ]);
 
             $mensajes[] = $resultado['success'] ? 'WhatsApp enviado.' : 'Error al enviar WhatsApp.';
@@ -243,17 +255,15 @@ class CitaController extends Controller
         $cita = $confirmacion->cita;
         $cita->load('cliente');
 
-        if ($confirmacion->canal === 'email') {
-            $resultado = app(EmailService::class)->enviarConfirmacionCita($cita);
-        } else {
-            $resultado = app(WhatsappService::class)->enviarConfirmacionCita($cita);
-        }
+        $resultado = $confirmacion->canal === 'email'
+            ? app(EmailService::class)->enviarConfirmacionCita($cita)
+            : app(WhatsappService::class)->enviarConfirmacionCita($cita);
 
         $confirmacion->update([
-            'estado' => $resultado['success'] ? 'enviado' : 'error',
-            'mensaje_error' => $resultado['error'],
+            'estado'              => $resultado['success'] ? 'enviado' : 'error',
+            'mensaje_error'       => $resultado['error'],
             'provider_message_id' => $resultado['provider_id'],
-            'fecha_envio' => now(),
+            'fecha_envio'         => now(),
         ]);
 
         if (!$resultado['success']) {
@@ -332,3 +342,5 @@ class CitaController extends Controller
         return response()->json($clientes);
     }
 }
+
+

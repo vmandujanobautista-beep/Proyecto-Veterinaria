@@ -42,13 +42,12 @@ class AdminConfiguracionController extends Controller
             'clinica_logo.max'        => 'El logo no puede superar 2 MB.',
         ]);
 
-        // Manejo del logo
-        // Convertir strings JSON a arrays para que el cast del modelo funcione correctamente
-        if (isset($validated['horarios'])) {
-            $validated['horarios'] = json_decode($validated['horarios'], true);
-        }
-        if (isset($validated['servicios'])) {
-            $validated['servicios'] = json_decode($validated['servicios'], true);
+        // Decodificar JSON strings a arrays para que el cast del modelo funcione
+        foreach (['horarios', 'servicios'] as $campo) {
+            if (isset($validated[$campo]) && is_string($validated[$campo])) {
+                $decoded = json_decode($validated[$campo], true);
+                $validated[$campo] = is_array($decoded) ? $decoded : null;
+            }
         }
 
         if ($request->hasFile('clinica_logo')) {
@@ -58,15 +57,10 @@ class AdminConfiguracionController extends Controller
             $validated['clinica_logo'] = $request->file('clinica_logo')->store('logos', 'public');
         }
 
-        // Parsear JSON strings a arrays si vienen como texto desde JS
-        foreach (['horarios', 'servicios'] as $campo) {
-            if (isset($validated[$campo]) && is_string($validated[$campo])) {
-                $decoded = json_decode($validated[$campo], true);
-                $validated[$campo] = is_array($decoded) ? $decoded : null;
-            }
-        }
-
         $config->update($validated);
+
+        // Invalida el singleton en memoria para que el siguiente request cargue los datos nuevos
+        \App\Models\Configuracion::invalidarCache();
 
         return redirect()->route('admin.configuracion.index')
             ->with('success', 'Configuración guardada correctamente.');

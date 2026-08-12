@@ -211,10 +211,10 @@
                                        focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent
                                        {{ $errors->has('tipo_servicio') ? 'border-rose-400 bg-rose-50' : 'border-slate-200 bg-slate-50 hover:border-slate-300' }}">
                             <option value="">— Selecciona servicio —</option>
-                            @foreach(\App\Models\Cita::SERVICIOS_PRECIOS as $servicio => $precio)
-                                <option value="{{ $servicio }}"
-                                    {{ old('tipo_servicio', $cita->tipo_servicio) === $servicio ? 'selected' : '' }}>
-                                    {{ $servicio }} - ${{ number_format($precio, 2) }}
+                            @foreach($servicios as $s)
+                                <option value="{{ $s['nombre'] }}"
+                                    {{ old('tipo_servicio', $cita->tipo_servicio) === $s['nombre'] ? 'selected' : '' }}>
+                                    {{ $s['nombre'] }} - ${{ number_format($s['precio'], 2) }}
                                 </option>
                             @endforeach
                         </select>
@@ -326,6 +326,83 @@
             </form>
         </div>
 
+        <!-- Info Card (Horarios) -->
+        <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
+            <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div>
+                <p class="text-sm font-semibold text-amber-800">Horario de atención</p>
+                <p class="text-xs text-amber-700 mt-0.5">
+                    @foreach($horarios as $h)
+                        {{ $h['dia'] }}: {{ $h['cerrado'] ? 'Cerrado' : $h['apertura'].' a '.$h['cierre'] }}
+                        @if(!$loop->last) &middot; @endif
+                    @endforeach
+                </p>
+            </div>
+        </div>
+
     </div>
 
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const horarios = @json($horarios);
+            const fechaInput = document.getElementById('fecha');
+            const horaInput = document.getElementById('hora');
+            
+            function validarHorario() {
+                // Validación básica (informativa)
+                const fechaVal = fechaInput.value;
+                const horaVal = horaInput.value;
+                if (!fechaVal || !horaVal) return;
+                
+                const fecha = new Date(fechaVal + 'T00:00:00');
+                const dayIndex = fecha.getDay(); // 0: Dom, 1: Lun, 2: Mar, 3: Mie, 4: Jue, 5: Vie, 6: Sab
+                
+                // Mapeo simple de días
+                const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+                const nombreDiaSeleccionado = diasSemana[dayIndex];
+                
+                let horarioEncontrado = null;
+                for (let h of horarios) {
+                    let nombreRango = h.dia.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    if (nombreRango.includes(nombreDiaSeleccionado) || (nombreDiaSeleccionado === 'lunes' && nombreRango.includes('lun'))) {
+                        horarioEncontrado = h;
+                        break;
+                    }
+                    if (nombreRango.includes('viernes') && dayIndex >= 1 && dayIndex <= 5 && nombreRango.includes('lunes')) {
+                        horarioEncontrado = h;
+                        break;
+                    }
+                }
+                
+                const existingWarning = document.getElementById('horario-warning');
+                if (existingWarning) existingWarning.remove();
+                
+                if (horarioEncontrado) {
+                    if (horarioEncontrado.cerrado) {
+                        mostrarAdvertencia('La clínica suele estar cerrada en el día seleccionado. Procede solo si es una urgencia.');
+                    } else if (horaVal < horarioEncontrado.apertura || horaVal > horarioEncontrado.cierre) {
+                        mostrarAdvertencia('La hora seleccionada está fuera del horario de atención (' + horarioEncontrado.apertura + ' a ' + horarioEncontrado.cierre + ').');
+                    }
+                }
+            }
+            
+            function mostrarAdvertencia(msg) {
+                const p = document.createElement('p');
+                p.id = 'horario-warning';
+                p.className = 'text-xs text-amber-600 font-medium mt-1';
+                p.innerHTML = '⚠️ ' + msg;
+                horaInput.parentElement.parentElement.appendChild(p);
+            }
+
+            fechaInput.addEventListener('change', validarHorario);
+            horaInput.addEventListener('change', validarHorario);
+            
+            // Validar al inicio
+            validarHorario();
+        });
+    </script>
+    @endpush
 </x-app-layout>

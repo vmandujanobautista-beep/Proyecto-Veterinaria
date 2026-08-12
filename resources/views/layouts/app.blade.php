@@ -300,6 +300,33 @@
                 transform: none;
             }
         }
+        
+        /* Gear animation */
+        @keyframes gear-rotator {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes gear-center {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        @keyframes gear-body {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .gear-rotator, .gear-center, .gear-body {
+            transform-origin: center;
+            transform-box: fill-box;
+        }
+        .group:hover .gear-rotator {
+            animation: gear-rotator 1.5s linear infinite;
+        }
+        .group:hover .gear-center {
+            animation: gear-center 0.6s ease-out infinite;
+        }
+        .group:hover .gear-body {
+            animation: gear-body 0.6s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="bg-slate-100 antialiased">
@@ -488,10 +515,26 @@
                 <a href="{{ route('admin.configuracion.index') }}"
                    :title="!sidebarOpen ? 'Configuración' : ''"
                    class="nav-link-item flex items-center py-2.5 rounded-lg text-slate-300 hover:text-white group {{ request()->routeIs('admin.configuracion.*') ? 'nav-item-active text-white' : '' }}"
-                   :class="sidebarOpen ? 'px-3 gap-3' : 'justify-center px-0 mt-2'">
-                    <svg class="w-5 h-5 text-teal-400 group-hover:text-teal-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                   :class="sidebarOpen ? 'px-3 gap-3' : 'justify-center px-0 mt-2'"
+                   onmouseenter="document.getElementById('gear-anim').beginElement()"
+                   onmouseleave="document.getElementById('gear-anim').endElement()">
+                    {{-- animateTransform nativo SVG — confiable en todos los navegadores, sin problemas de transform-origin --}}
+                    <svg class="w-5 h-5 text-teal-400 group-hover:text-teal-300 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-miterlimit="10">
+                        <g>
+                            <animateTransform
+                                id="gear-anim"
+                                attributeName="transform"
+                                attributeType="XML"
+                                type="rotate"
+                                from="0 16 16"
+                                to="360 16 16"
+                                dur="1.5s"
+                                begin="indefinite"
+                                repeatCount="indefinite"
+                            />
+                            <circle cx="16" cy="16" r="5" />
+                            <path d="m30,17.5v-3l-3.388-1.355c-.25-.933-.617-1.815-1.089-2.633l1.436-3.351-2.121-2.121-3.351,1.436c-.817-.472-1.7-.838-2.633-1.089l-1.355-3.388h-3l-1.355,3.388c-.933.25-1.815.617-2.633,1.089l-3.351-1.436-2.121,2.121 1.436,3.351c-.472.817-.838,1.7-1.089,2.633l-3.388,1.355v3l3.388,1.355c.25.933.617,1.815,1.089,2.633l-1.436,3.351 2.121,2.121 3.351-1.436c.817.472 1.7.838 2.633,1.089l1.355,3.388h3l1.355-3.388c.933-.25 1.815-.617 2.633-1.089l3.351,1.436 2.121-2.121-1.436-3.351c.472-.817.838-1.7 1.089-2.633l3.388-1.355Z" />
+                        </g>
                     </svg>
                     <span x-show="sidebarOpen" class="text-sm font-medium whitespace-nowrap">Configuración</span>
                 </a>

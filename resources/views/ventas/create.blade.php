@@ -365,14 +365,29 @@
                         <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
                             Método de Pago
                         </label>
+                        @php
+                            $metodosConfig = \App\Models\Configuracion::instancia()->metodos_pago;
+                            if (is_string($metodosConfig)) $metodosConfig = json_decode($metodosConfig, true);
+                            $metodos = is_array($metodosConfig) && !empty($metodosConfig) ? $metodosConfig : ['Efectivo', 'Tarjeta de crédito', 'Tarjeta de débito', 'Transferencia bancaria'];
+
+                            $emojiMap = [
+                                'Efectivo' => '💵',
+                                'Tarjeta de crédito' => '💳',
+                                'Tarjeta de débito' => '💳',
+                                'Transferencia bancaria' => '🏦',
+                                'OXXO Pay' => '🏪'
+                            ];
+                        @endphp
                         <select id="pos-metodo-pago"
                                 x-model="metodoPago"
                                 class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50
                                        focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none transition-all">
                             <option value="">— Selecciona —</option>
-                            <option value="Efectivo">💵 Efectivo</option>
-                            <option value="Tarjeta">💳 Tarjeta</option>
-                            <option value="Transferencia">🏦 Transferencia</option>
+                            @foreach($metodos as $metodo)
+                                <option value="{{ $metodo }}">
+                                    {{ $emojiMap[$metodo] ?? '💰' }} {{ $metodo }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
 

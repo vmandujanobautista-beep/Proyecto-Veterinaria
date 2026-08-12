@@ -169,10 +169,10 @@
                                        focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
                                        {{ $errors->has('tipo_servicio') ? 'border-rose-400 bg-rose-50' : 'border-slate-200 bg-slate-50 hover:border-slate-300' }}">
                             <option value="">— Selecciona servicio —</option>
-                            @foreach(\App\Models\Cita::SERVICIOS_PRECIOS as $servicio => $precio)
-                                <option value="{{ $servicio }}"
-                                    {{ old('tipo_servicio') === $servicio ? 'selected' : '' }}>
-                                    {{ $servicio }} - ${{ number_format($precio, 2) }}
+                            @foreach($servicios as $s)
+                                <option value="{{ $s['nombre'] }}"
+                                    {{ old('tipo_servicio') === $s['nombre'] ? 'selected' : '' }}>
+                                    {{ $s['nombre'] }} - ${{ number_format($s['precio'], 2) }}
                                 </option>
                             @endforeach
                         </select>
@@ -244,10 +244,73 @@
             <div>
                 <p class="text-sm font-semibold text-violet-800">Horario de atención</p>
                 <p class="text-xs text-violet-600 mt-0.5">
-                    Lunes a Viernes de 9:00 a 18:00 hrs · Sábados de 9:00 a 14:00 hrs · Emergencias 24/7
+                    @foreach($horarios as $h)
+                        {{ $h['dia'] }}: {{ $h['cerrado'] ? 'Cerrado' : $h['apertura'].' a '.$h['cierre'] }}
+                        @if(!$loop->last) &middot; @endif
+                    @endforeach
                 </p>
             </div>
         </div>
     </div>
 
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const horarios = @json($horarios);
+            const fechaInput = document.getElementById('fecha');
+            const horaInput = document.getElementById('hora');
+            
+            function validarHorario() {
+                // Validación básica (informativa)
+                const fechaVal = fechaInput.value;
+                const horaVal = horaInput.value;
+                if (!fechaVal || !horaVal) return;
+                
+                const fecha = new Date(fechaVal + 'T00:00:00');
+                const dayIndex = fecha.getDay(); // 0: Dom, 1: Lun, 2: Mar, 3: Mie, 4: Jue, 5: Vie, 6: Sab
+                
+                // Mapeo simple de días
+                const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+                const nombreDiaSeleccionado = diasSemana[dayIndex];
+                
+                let horarioEncontrado = null;
+                for (let h of horarios) {
+                    let nombreRango = h.dia.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    // Muy simplificado: buscamos si el nombre del día está en la cadena del rango (Ej: 'lunes - viernes')
+                    // Esto es solo una validación visual básica.
+                    if (nombreRango.includes(nombreDiaSeleccionado) || (nombreDiaSeleccionado === 'lunes' && nombreRango.includes('lun'))) {
+                        horarioEncontrado = h;
+                        break;
+                    }
+                    if (nombreRango.includes('viernes') && dayIndex >= 1 && dayIndex <= 5 && nombreRango.includes('lunes')) {
+                        horarioEncontrado = h;
+                        break;
+                    }
+                }
+                
+                const existingWarning = document.getElementById('horario-warning');
+                if (existingWarning) existingWarning.remove();
+                
+                if (horarioEncontrado) {
+                    if (horarioEncontrado.cerrado) {
+                        mostrarAdvertencia('La clínica suele estar cerrada en el día seleccionado. Procede solo si es una urgencia.');
+                    } else if (horaVal < horarioEncontrado.apertura || horaVal > horarioEncontrado.cierre) {
+                        mostrarAdvertencia('La hora seleccionada está fuera del horario de atención (' + horarioEncontrado.apertura + ' a ' + horarioEncontrado.cierre + ').');
+                    }
+                }
+            }
+            
+            function mostrarAdvertencia(msg) {
+                const p = document.createElement('p');
+                p.id = 'horario-warning';
+                p.className = 'text-xs text-amber-600 font-medium mt-1';
+                p.innerHTML = '⚠️ ' + msg;
+                horaInput.parentElement.parentElement.appendChild(p);
+            }
+
+            fechaInput.addEventListener('change', validarHorario);
+            horaInput.addEventListener('change', validarHorario);
+        });
+    </script>
+    @endpush
 </x-app-layout>

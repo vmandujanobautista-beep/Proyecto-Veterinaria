@@ -14,10 +14,11 @@ class WhatsappService
 
     public function __construct()
     {
-        $this->sid        = config('services.twilio.sid', env('TWILIO_SID', ''));
-        $this->authToken  = config('services.twilio.auth_token', env('TWILIO_AUTH_TOKEN', ''));
-        $this->fromNumber = config('services.twilio.whatsapp_number', env('TWILIO_WHATSAPP_NUMBER', ''));
-        $this->testMode   = env('VETCARE_NOTIFICATIONS_TEST_MODE', false);
+        $this->sid        = config('services.twilio.sid', '');
+        $this->authToken  = config('services.twilio.auth_token', '');
+        $this->fromNumber = config('services.twilio.whatsapp_number', '');
+        // config() es compatible con php artisan config:cache, env() no lo es
+        $this->testMode   = config('app.vetcare_test_mode', env('VETCARE_NOTIFICATIONS_TEST_MODE', false));
     }
 
     /**
@@ -31,11 +32,11 @@ class WhatsappService
     {
         if ($this->testMode) {
             Log::info('Test Mode: Simulando envío de WhatsApp a ' . $telefono);
-            sleep(1); // Simular latencia de red
+            // Sin sleep() — no bloqueamos el hilo en modo de prueba
             return [
-                'success' => true,
+                'success'     => true,
                 'provider_id' => 'test_tw_' . uniqid(),
-                'error' => null,
+                'error'       => null,
             ];
         }
 

@@ -355,8 +355,8 @@
                 
                 <!-- Contenedor del Logo / Icono -->
                 <div class="w-12 h-12 bg-[#0c3859] rounded-full flex items-center justify-center shrink-0 overflow-hidden">
-                    @if($clinica_config->clinica_logo)
-                        <img src="{{ Storage::url($clinica_config->clinica_logo) }}" alt="Logo" class="w-full h-full object-cover">
+                    @if($clinica_config->clinica_logo && Storage::disk('public')->exists($clinica_config->clinica_logo))
+                        <img src="{{ Storage::url($clinica_config->clinica_logo) }}" alt="Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.outerHTML='<svg class=\'w-6 h-6 text-sky-400\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M16 7a4 4 0 11-8 0 4 4 0 018 0z\'></path><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z\'></path></svg>';">
                     @else
                         <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>

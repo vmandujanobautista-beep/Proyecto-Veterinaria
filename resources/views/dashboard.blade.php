@@ -959,7 +959,27 @@
                                 {{ $cita->mascota->nombre ?? '—' }}
                                 <span class="text-slate-400 font-normal">· {{ $cita->cliente->nombre ?? '' }}</span>
                             </p>
-                            <p class="text-xs text-slate-500 mt-0.5">{{ $cita->motivo ?? 'Consulta general' }}</p>
+                            <p class="text-xs font-semibold text-violet-600 mt-0.5">
+                                @php
+                                    $icono = match($cita->tipo_servicio) {
+                                        'Consulta General' => '🩺',
+                                        'Vacunación' => '💉',
+                                        'Desparasitación' => '🦠',
+                                        'Baño y Corte' => '🛁',
+                                        'Esterilización/Castración' => '✂️',
+                                        'Cirugía' => '🔬',
+                                        'Laboratorio' => '🧪',
+                                        'Rayos X / Ultrasonido' => '📡',
+                                        'Chequeo General' => '📋',
+                                        'Urgencias' => '🚨',
+                                        default => '🐾'
+                                    };
+                                @endphp
+                                {{ $icono }} {{ $cita->tipo_servicio ?? 'Consulta general' }}
+                                @if($cita->motivo)
+                                    <span class="text-slate-500 font-normal ml-1 border-l border-slate-300 pl-1">{{ Str::limit($cita->motivo, 35) }}</span>
+                                @endif
+                            </p>
                         </div>
                         <div class="text-right flex-shrink-0">
                             <p class="text-xs font-semibold text-slate-700">{{ \Carbon\Carbon::parse($cita->hora)->format('H:i') }}</p>

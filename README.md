@@ -100,7 +100,40 @@ El proyecto está construido sobre el ecosistema moderno de PHP utilizando el **
 7. **Acceder a la plataforma**
    Abre tu navegador web y visita: `http://localhost:8000`
 
+## 💻 Demostración Visual del Sistema
 
+<table align="center">
+  <tr>
+    <td align="center">
+      <b>📊 Panel de Supervisión (KPIs)</b><br>
+      <img src="docs/images/Panel_De_Supervisión.png" width="400px" alt="Panel de Supervisión y KPIs">
+    </td>
+    <td align="center">
+      <b>📈 Inteligencia de Negocios y Auditoría</b><br>
+      <img src="docs/images/Panel_De_Supervisión_Auditoria.png" width="400px" alt="Gráficas y Auditoría">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <b>🛒 Punto de Venta (POS) Integrado</b><br>
+      <img src="docs/images/Panel_De_Ventas(POS).png" width="400px" alt="Punto de Venta Integrado">
+    </td>
+    <td align="center">
+      <b>🗓️ Control de Agenda Médica</b><br>
+      <img src="docs/images/Panel_De_Citas.png" width="400px" alt="Módulo de Agenda">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <b>👥 Panel de Recepcionistas</b><br>
+      <img src="docs/images/Dashboard_General.png" width="400px" alt="Dashboard de Recepción">
+    </td>
+    <td align="center">
+      <b>🏥 Gestión de Pacientes y Clientes</b><br>
+      <img src="docs/images/Perfil_De_Cliente.png" width="400px" alt="Perfil del Cliente y Mascotas">
+    </td>
+  </tr>
+</table>
 
 ## 🗺️ Próximos Pasos
 

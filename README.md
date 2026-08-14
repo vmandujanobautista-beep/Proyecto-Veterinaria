@@ -160,7 +160,7 @@ El proyecto está construido sobre el ecosistema moderno de PHP utilizando el **
 Soy estudiante de Ingeniería en Sistemas Computacionales enfocado en el diseño de bases de datos relacionales, arquitecturas de software escalables (SaaS) y la integración de inteligencia de negocios en el desarrollo web.
 
 * 🌐 **LinkedIn:** (www.linkedin.com/in/victor-mandujano-bautista)
-* 🐙 **GitHub:** [@vmandujanobautista-beep](https://github.com/vmandujanobautista-beep)
+* :octocat: **GitHub:** [@vmandujanobautista-beep](https://github.com/vmandujanobautista-beep)
 * ✉️ **Email:** [vmandujanobautista@gmail.com]
 
 ---
